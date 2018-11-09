@@ -13,6 +13,7 @@ Tsinghua University CS-HCI course team project : using leapmotion to implement a
 由于我们需要在Windows和Mac上同时进行开发和测试，所以需要遵守以下注意事项
 
 + 不要使用Visual Studio特有的函数和库，比如**scanf_s**，也不要使用Mac下Unix系统特有的函数库比如**asctime**等。
++ 头文件请使用 #ifndef HCI_XXXX_H 的方式来进行防止多次包含而不要使用#progma once, 其中**XXXX**请使用文件名的全大写
 + 为避免麻烦我们只开启C++11支持。请不要使用更新的特性。
 + 尽可能使用C++的函数而不是C的函数，比如输入输出使用**cin/cout** 而不是**scanf/printf**, 字符串使用**string**而不是**char \***
 + 尽可能采用类成员函数而不是单一的函数
