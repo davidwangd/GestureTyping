@@ -29,4 +29,14 @@ Tsinghua University CS-HCI course team project : using leapmotion to implement a
 |Sample.cpp|LeapMotion|一个LeapMotion的描述样例|
 
 ### 任务安排和组员分工
-在11.12日进行讨论。
++ UI: Alice1998
++ Algorithm: chasesheep
++ LeapMotion: davidwangd, EvenQAQ
+
+### 第一次CheckPoint计划
++ UI： 实现UI类，能够显示，实现接口setPoint，能够根据LeapMotion的处理数据显示目前的位置。
+  + Enhance: 实现选中键位高亮和轨迹显示。
++ LeapMotion: 能够识别输入的手势和输入位置。
+  + Enhance: 能够识别左手所代表的的模式。
++ Algorithm：无
+  + Enhance: 大致根据UI中键盘的布局，得到对于词库中每个单词的轨迹路径,以文件的形式存储。
