@@ -34,7 +34,7 @@ Tsinghua University CS-HCI course team project : using leapmotion to implement a
 + LeapMotion: davidwangd, EvenQAQ
 
 ### 第一次CheckPoint计划
-+ UI： 实现UI类，能够显示，实现接口setPoint，能够根据LeapMotion的处理数据显示目前的位置。
++ UI： 实现UI类，能够显示键盘，实现接口setPoint，能够根据LeapMotion的处理数据显示目前的位置。
   + Enhance: 实现选中键位高亮和轨迹显示。
 + LeapMotion: 能够识别输入的手势和输入位置。
   + Enhance: 能够识别左手所代表的的模式。
