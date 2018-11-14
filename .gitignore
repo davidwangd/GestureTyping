@@ -35,3 +35,7 @@
 .vs*
 *.vcxproj*
 x64*
+
+
+#Mac layout
+*/.DS_Store
