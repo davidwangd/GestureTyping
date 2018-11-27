@@ -1,0 +1,5 @@
+目前，UI界面提供如下接口：
+#Class keyboard
+其中的成员函数:
+#setPosXY(int x0, int y0)  0 <= x0 <= 1200, 0 <= y0 <= 313 表示手指指向键盘的（x0,y0）位置。正常返回0，位置不合法返回-1。
+#setGesture(int gesture)切换输入状态。目前只有两种状态，输入中和选择中，分别用gesture=0和gesture=1表示。初始状态默认为gesture=0。

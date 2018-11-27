@@ -119,6 +119,7 @@ int keyboard::clear_trajectory() {
 int keyboard::setPosXY(int x, int y) {
     //printf("xy: %d %d\n", x, y);
     //if (tail == trajectory_point_num - 1 || tail + 1 == head) head = (head + 1) % trajectory_point_num;
+    if (!bounded(x, y)) return -1;
     if (getnext(tail) == head) head = getnext(head);
     px[tail] = x; py[tail] = y;
     pt[tail] = curTime = clock();
@@ -126,6 +127,8 @@ int keyboard::setPosXY(int x, int y) {
     tail = getnext(tail);
 
     draw(x, y);
+
+    return 0;
 }
 
 int keyboard::draw(int x, int y) {
