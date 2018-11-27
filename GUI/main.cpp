@@ -28,7 +28,7 @@ int main()
     img.fill(0);
     // 定义一个紫色
     unsigned char purple[] = { 255,0,255 };
-    
+
     // 在坐标(100, 100)处画一个紫色的“Hello world”
     img.draw_text(100,100,"Hello World",purple);
     // 在一个标题为“My first CImg code”的窗口中显示这幅图像
@@ -36,6 +36,6 @@ int main()
     img.draw_image(100,100,SrcImg);
     img.display("keyboard Layout");
     //img.display("keyboard Layout");
-    
+
     return 0;
-} 
+}

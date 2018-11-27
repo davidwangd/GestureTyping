@@ -1,0 +1,161 @@
+//#define cimg_use_jpeg CIMG_USE_JPEG
+#include "keyboardUI.h"
+
+using namespace cimg_library;
+
+const int height = 320, width = 1201;
+
+const int limit = 2000;
+
+const unsigned char red[] = { 255, 0, 0 }, green[] = { 0, 255, 0 }, blue[] = { 0, 0, 255 };
+
+const unsigned char black[] = {0, 0, 0}, white[] = {255, 255, 255};
+
+const char letters[3][11] = {"qwertyuiop", "asdfghjkl","zxcvbnm"};
+const int len[3] = {10, 9, 7};
+
+keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width, height+60, 1, 3, 0), disp(visu, "Keyboard") {
+    visu.fill(255).draw_image(0, 0, 0, 0, img).display(disp);
+    trajectory_point_num = trajectory_len;
+    head = tail = 0;
+    gesture = 0;
+    initPos();
+}
+
+void keyboard::initPos() {
+    for (char ch = 'a'; ch <= 'z'; ch++) {
+        bool flag = false;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < len[i]; j++) if (letters[i][j] == ch) {
+                posx[ch] = i; posy[ch] = j; flag = true; break;
+            }
+            if (flag) break;
+        }
+    }
+}
+
+bool keyboard::bounded(int x, int y) {
+    return ((x >= 0 && x < width) && (y >= 0 && y < height));
+}
+
+int keyboard::highlight(int y0, int x0) {
+    int x, y;
+
+    if (y0 == 0) x = x0 * 77 + 115;
+    else if (y0 == 1) x = x0 * 77 + 154;
+    else if (y0 == 2) x = x0 * 77 + 193;
+    y = y0 * 62 + 63;
+    //printf("x0: %d y0: %d\n", x, y);
+
+    antiColor(x, y, x+77, y+62);
+    //visu.draw_rectangle(x, y, x+77, y+62, red);
+}
+
+int keyboard::antiColor(int x0, int y0, int x1, int y1) {
+    unsigned char color[3];
+    for (int i = x0; i < x1; i++)
+        for (int j = y0; j < y1; j++)
+            if (bounded(i, j)) {
+                for (int k = 0; k < 3; k++)
+                    color[k] = 255 - visu(i, j, 0, k);
+                visu.draw_point(i, j, 0, color);
+            }
+}
+
+int keyboard::getPos(int x, int y) {
+    int yIndex = (y - 63) / 62, xIndex;
+    if (y < 63 || y >= 249) {
+        if (y >= 63 || x < 1077) return -1;
+        yIndex = -1; xIndex = 0;
+    }
+    else {
+        switch (yIndex) {
+            case 0: if (x < 115 || x >= 885) return -1;
+                    xIndex = (x - 115) / 77;
+                    break;
+            case 1: if (x < 154 || x >= 847) return -1;
+                    xIndex = (x - 154) / 77;
+                    break;
+            case 2: if (x < 193 || x >= 732) return -1;
+                    xIndex = (x - 194) / 77;
+                    break;
+            default: //printf("Why? %d\n", x);
+                    break;
+        }
+    }
+
+    //printf("Index: %d %d\n", xIndex, yIndex);
+    getName(yIndex, xIndex);
+}
+
+int keyboard::getName(int y, int x) {
+    if (gesture == 0) displayState("Current State is: Input");
+    if (y >= 0) {
+        //putchar(letters[y][x]);
+        //putchar('\n');
+        char message[] = "Current key is:  ";
+        message[16] = letters[y][x];
+        displayKey(message);
+        highlight(y, x);
+    }
+    else {
+        //puts("Backspace");
+        displayKey("Current key is: Backspace");
+        antiColor(1077, 0, 1200, 62);
+    }
+}
+
+int keyboard::setGesture(int gesture) {
+    this->gesture = gesture;
+}
+
+int keyboard::setPosXY(int x, int y) {
+    //printf("xy: %d %d\n", x, y);
+    //if (tail == trajectory_point_num - 1 || tail + 1 == head) head = (head + 1) % trajectory_point_num;
+    if (getnext(tail) == head) head = getnext(head);
+    px[tail] = x; py[tail] = y;
+    pt[tail] = curTime = clock();
+    //printf("time: %d\n", pt[tail]);    ///consider adding time flags here?
+    tail = getnext(tail);
+
+    draw(x, y);
+}
+
+int keyboard::draw(int x, int y) {
+    visu.fill(255).draw_image(0, 0, 0, 0, img);
+    getPos(x, y);
+    visu.draw_circle(x, y, 10, blue);
+    draw_trajectory();
+    visu.display(disp);
+}
+
+int keyboard::draw_trajectory() {
+    //printf("head: %d tail: %d\n", head, tail);
+    if (gesture == 0 && getnext(head) != tail) {
+        for (int i = head, j = getnext(i); j != tail; i = j, j = getnext(j)) {
+            if (curTime - pt[i] >= limit) {
+                head = getnext(head);
+                continue;
+            }
+            visu.draw_line(px[i], py[i], px[j], py[j], blue);
+            visu.draw_line(px[i]+1, py[i], px[j]+1, py[j], blue);
+            visu.draw_line(px[i]-1, py[i], px[j]-1, py[j], blue);
+            visu.draw_line(px[i], py[i]+1, px[j], py[j]+1, blue);
+            visu.draw_line(px[i], py[i]-1, px[j], py[j]-1, blue);
+        }
+    }
+}
+
+int keyboard::getnext(int i) {
+    //printf("traj: %d\n", trajectory_point_num);
+    if (i == trajectory_point_num - 1) return 0;
+    else return (i+1);
+}
+
+int keyboard::displayKey(const char *str) {
+    visu.draw_text(250, 335, str, black, white, 1, CImgList<unsigned char>::font(25));
+}
+
+int keyboard::displayState(const char *str) {
+    visu.draw_text(750, 335, str, black, white, 1, CImgList<unsigned char>::font(25));
+}
