@@ -27,6 +27,7 @@ Tsinghua University CS-HCI course team project : using leapmotion to implement a
 |文件名|作者|文件描述|
 |:----:|:-----:|:-----:|
 |Sample.cpp|LeapMotion|一个LeapMotion的描述样例|
+|Listener|DavidWang|一个LeapMotion交互的监听器|
 
 ### 任务安排和组员分工
 + UI: Alice1998
