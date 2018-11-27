@@ -15,7 +15,7 @@ const char letters[3][11] = {"qwertyuiop", "asdfghjkl","zxcvbnm"};
 const int len[3] = {10, 9, 7};
 const int rad[3] = {10, 20, 10};
 
-keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width, height+60, 1, 3, 0), disp(visu, "Keyboard") {
+keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width, height+60, 1, 3, 0), mouse("mouse.bmp"), disp(visu, "Keyboard") {
     visu.fill(255).draw_image(0, 0, 0, 0, img).display(disp);
     if (trajectory_len < 10) trajectory_point_num = 10;
     else if (trajectory_len > 200) trajectory_point_num = 200;
@@ -108,8 +108,13 @@ int keyboard::getName(int y, int x) {
 }
 
 int keyboard::setGesture(int gesture) {
+    if (gesture < 0 || gesture > 2) {
+        printf("Error! Gesture number out of range.\n");
+        return -1;
+    }
     this->gesture = gesture;
     clear_trajectory();
+    return 0;
 }
 
 int keyboard::clear_trajectory() {
@@ -119,7 +124,10 @@ int keyboard::clear_trajectory() {
 int keyboard::setPosXY(int x, int y) {
     //printf("xy: %d %d\n", x, y);
     //if (tail == trajectory_point_num - 1 || tail + 1 == head) head = (head + 1) % trajectory_point_num;
-    if (!bounded(x, y)) return -1;
+    if (!bounded(x, y)) {
+        printf("Error! Position index out of range.\n");
+        return -1;
+    }
     if (getnext(tail) == head) head = getnext(head);
     px[tail] = x; py[tail] = y;
     pt[tail] = curTime = clock();
@@ -137,9 +145,15 @@ int keyboard::draw(int x, int y) {
     else if (gesture == 1) displayState("Current mode is: Selecting");
     else if (gesture == 2) displayState("Current mode is: Waiting");
     getPos(x, y);
-    visu.draw_circle(x, y, rad[gesture], blue);
+    drawMouse(x, y, gesture);
+    //visu.draw_circle(x, y, rad[gesture], blue);
     if (gesture == 0) draw_trajectory();
     visu.display(disp);
+}
+
+int keyboard::drawMouse(int x, int y, int gesture) {
+    if (gesture != 1) visu.draw_circle(x, y, rad[gesture], blue);
+    else visu.draw_image(x-20, y-25, 0, 0, mouse);
 }
 
 int keyboard::draw_trajectory() {

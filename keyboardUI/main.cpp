@@ -13,9 +13,9 @@ int main() {
         if (main_disp.button() && main_disp.mouse_x() >= 0 && main_disp.mouse_y()>=0) {
             int x = main_disp.mouse_x(), y = main_disp.mouse_y();
             board.setPosXY(x, y);
-            if (x > 1000 && ((y > 160 && gesture == 1) || (y <= 160 && gesture == 0))) {
-                gesture = 1 - gesture;
-                board.setGesture(gesture);
+            if (x > 1000) {
+                gesture = y / 100;
+                if (gesture < 3) board.setGesture(gesture);
             }
         }
     }

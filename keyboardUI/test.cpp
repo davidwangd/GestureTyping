@@ -13,7 +13,7 @@ int main() {
         //usleep(20000000);
         Sleep(100);
         if (i % 100 == 0) {
-            gesture = 1 - gesture;
+            gesture = (gesture + 1) % 3;
             board.setGesture(gesture);
         }
     }

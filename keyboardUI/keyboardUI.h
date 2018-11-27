@@ -15,6 +15,7 @@ public:
 
     cimg_library::CImg<unsigned char> img;
     cimg_library::CImg<unsigned char> visu;
+    cimg_library::CImg<unsigned char> mouse;
     cimg_library::CImgDisplay disp;
 
     keyboard(int trajectory_len = 50);
@@ -26,6 +27,8 @@ public:
     int highlight(int y0, int x0);
 
     int antiColor(int x0, int y0, int x1, int y1);
+
+    int drawMouse(int x, int y, int gesture);
 
     int getPos(int x, int y);
 
