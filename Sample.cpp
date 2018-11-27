@@ -9,11 +9,11 @@
 #include <iostream>
 #include <cstring>
 #include "Leap.h"
-
+#include "Listener.h"
 using namespace Leap;
 
 class SampleListener : public Listener {
-  public:
+public:
     virtual void onInit(const Controller&);
     virtual void onConnect(const Controller&);
     virtual void onDisconnect(const Controller&);
@@ -24,8 +24,7 @@ class SampleListener : public Listener {
     virtual void onDeviceChange(const Controller&);
     virtual void onServiceConnect(const Controller&);
     virtual void onServiceDisconnect(const Controller&);
-
-  private:
+private:
 };
 
 const std::string fingerNames[] = {"Thumb", "Index", "Middle", "Ring", "Pinky"};
@@ -217,14 +216,15 @@ void SampleListener::onServiceDisconnect(const Controller& controller) {
 
 int main(int argc, char** argv) {
   // Create a sample listener and controller
-  SampleListener listener;
+  MyListener listener;
   Controller controller;
 
-  // Have the sample listener receive events from the controller
   controller.addListener(listener);
-
-  if (argc > 1 && strcmp(argv[1], "--bg") == 0)
-    controller.setPolicy(Leap::Controller::POLICY_BACKGROUND_FRAMES);
+  controller.setPolicy(Leap::Controller::POLICY_BACKGROUND_FRAMES);
+  while (controller.isPolicySet(Leap::Controller::POLICY_BACKGROUND_FRAMES))
+	  controller.setPolicy(Leap::Controller::POLICY_BACKGROUND_FRAMES);
+  std::cout << "Policy Setted!" << std::endl;
+  // Have the sample listener receive events from the controller
 
   // Keep this process running until Enter is pressed
   std::cout << "Press Enter to quit..." << std::endl;
