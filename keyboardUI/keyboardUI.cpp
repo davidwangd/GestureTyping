@@ -133,8 +133,9 @@ int keyboard::setPosXY(int x, int y) {
 
 int keyboard::draw(int x, int y) {
     visu.fill(255).draw_image(0, 0, 0, 0, img);
-    if (gesture == 0) displayState("Current mode is: Input");
+    if (gesture == 0) displayState("Current mode is: Typing");
     else if (gesture == 1) displayState("Current mode is: Selecting");
+    else if (gesture == 2) displayState("Current mode is: Waiting");
     getPos(x, y);
     visu.draw_circle(x, y, rad[gesture], blue);
     if (gesture == 0) draw_trajectory();
