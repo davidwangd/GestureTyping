@@ -8,8 +8,8 @@ class keyboard{
 public:
     int trajectory_point_num, head, tail;
     int gesture;
-    int px[52], py[52];
-    clock_t pt[52];
+    int px[205], py[205];
+    clock_t pt[205];
     clock_t curTime;
     int posx[200], posy[200];
 
@@ -42,6 +42,8 @@ public:
     int draw(int x, int y);
 
     int draw_trajectory();
+
+    int clear_trajectory();
 
     int getnext(int i);
 };

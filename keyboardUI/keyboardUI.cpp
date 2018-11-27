@@ -13,10 +13,13 @@ const unsigned char black[] = {0, 0, 0}, white[] = {255, 255, 255};
 
 const char letters[3][11] = {"qwertyuiop", "asdfghjkl","zxcvbnm"};
 const int len[3] = {10, 9, 7};
+const int rad[3] = {10, 20, 10};
 
 keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width, height+60, 1, 3, 0), disp(visu, "Keyboard") {
     visu.fill(255).draw_image(0, 0, 0, 0, img).display(disp);
-    trajectory_point_num = trajectory_len;
+    if (trajectory_len < 10) trajectory_point_num = 10;
+    else if (trajectory_len > 200) trajectory_point_num = 200;
+    else trajectory_point_num = trajectory_len;
     head = tail = 0;
     gesture = 0;
     initPos();
@@ -89,7 +92,6 @@ int keyboard::getPos(int x, int y) {
 }
 
 int keyboard::getName(int y, int x) {
-    if (gesture == 0) displayState("Current State is: Input");
     if (y >= 0) {
         //putchar(letters[y][x]);
         //putchar('\n');
@@ -107,6 +109,11 @@ int keyboard::getName(int y, int x) {
 
 int keyboard::setGesture(int gesture) {
     this->gesture = gesture;
+    clear_trajectory();
+}
+
+int keyboard::clear_trajectory() {
+    head = tail;
 }
 
 int keyboard::setPosXY(int x, int y) {
@@ -123,9 +130,11 @@ int keyboard::setPosXY(int x, int y) {
 
 int keyboard::draw(int x, int y) {
     visu.fill(255).draw_image(0, 0, 0, 0, img);
+    if (gesture == 0) displayState("Current mode is: Input");
+    else if (gesture == 1) displayState("Current mode is: Selecting");
     getPos(x, y);
-    visu.draw_circle(x, y, 10, blue);
-    draw_trajectory();
+    visu.draw_circle(x, y, rad[gesture], blue);
+    if (gesture == 0) draw_trajectory();
     visu.display(disp);
 }
 
@@ -153,9 +162,9 @@ int keyboard::getnext(int i) {
 }
 
 int keyboard::displayKey(const char *str) {
-    visu.draw_text(250, 335, str, black, white, 1, CImgList<unsigned char>::font(25));
+    visu.draw_text(230, 335, str, black, white, 1, CImgList<unsigned char>::font(25));
 }
 
 int keyboard::displayState(const char *str) {
-    visu.draw_text(750, 335, str, black, white, 1, CImgList<unsigned char>::font(25));
+    visu.draw_text(730, 335, str, black, white, 1, CImgList<unsigned char>::font(25));
 }
