@@ -1,6 +1,7 @@
 #ifndef LISTENER_H
 #define LISTENER_H
 #include <Leap.h>
+#include "keyboardUI\keyboardUI.h"
 
 class MyListener : public Leap::Listener {
 public:
@@ -27,6 +28,7 @@ private:
 		Selecting,					// 当前正在进行选词(五指张开)
 		Waiting 					// 当前正在等待开始打字(握拳状态)
 	} typeMode, preMode;
+	keyboard board;
 };
 
 #endif

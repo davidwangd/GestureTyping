@@ -8,9 +8,9 @@ using namespace Leap;
 const float MinX = -120;
 const float MaxX = 120;
 const float MinY = 250;
-const float MaxY = 80;
-const int WIDTH = 1920;
-const int HEIGHT = 1048;
+const float MaxY = 120;
+const int WIDTH = 1200;
+const int HEIGHT = 313;
 
 const char ListenerMode[10][20] = {
 	"Undetected!",
@@ -51,10 +51,10 @@ void MyListener::processRightHand(const Hand& hand) {
 	if (bones[1][0][4].distanceTo(bones[1][1][4]) < length / 3) {
 		typeMode = Waiting;
 	}
-	else if (bones[1][0][4].distanceTo(bones[1][2][4]) < length / 5 && bones[1][0][4].distanceTo(bones[1][1][4]) > length / 3) {
+	else if (bones[1][0][4].distanceTo(bones[1][2][4]) < length / 4 && bones[1][0][4].distanceTo(bones[1][1][4]) > length / 4) {
 		typeMode = Typing;
 	}
-	else if (bones[1][0][4].distanceTo(bones[1][2][4]) > length * 0.4 && bones[1][0][4].distanceTo(bones[1][1][4]) > length / 3){
+	else if (bones[1][0][4].distanceTo(bones[1][2][4]) > length * 0.4 && bones[1][0][4].distanceTo(bones[1][1][4]) > length / 4){
 		typeMode = Selecting;
 	}
 }
@@ -66,6 +66,12 @@ void MyListener::onDisconnect(const Controller& controller) {
 
 void MyListener::onExit(const Controller& controller) {
 	std::cout << "Exited" << std::endl;
+}
+
+inline int slice(int x, int l, int r) {
+	if (x < l) return l;
+	if (x > r) return r;
+	return x;
 }
 
 void MyListener::onFrame(const Controller& controller) {
@@ -81,18 +87,22 @@ void MyListener::onFrame(const Controller& controller) {
 		if (hand.isLeft()) processLeftHand(hand);
 		else processRightHand(hand);
 	}
-	if (preMode != typeMode)
+	if (preMode != typeMode) {
 		cout << ListenerMode[this->typeMode] << endl;
-
+		board.setGesture(this->typeMode - 1);
+	}
 	if (this->typeMode == Typing && this->preMode == Waiting) {
 		cout << "Position: " << this->bones[1][1][4] << endl;
 	}
 
-	if (this->typeMode == Typing) {
+	if (this->typeMode != Undetected) {
 		int x = (this->bones[1][1][4].x - MinX) / (MaxX - MinX) * WIDTH;
 		int y = (this->bones[1][1][4].y - MinY) / (MaxY - MinY) * HEIGHT;
-		SetCursorPos(x, y);
+		x = slice(x, 0, WIDTH);
+		y = slice(y, 0, HEIGHT);
+		board.setPosXY(x, y);
 	}
+
 }
 
 void MyListener::onFocusGained(const Controller& controller) {

@@ -52,6 +52,7 @@ int keyboard::highlight(int y0, int x0) {
 
     antiColor(x, y, x+77, y+62);
     //visu.draw_rectangle(x, y, x+77, y+62, red);
+	return 0;
 }
 
 int keyboard::antiColor(int x0, int y0, int x1, int y1) {
@@ -63,6 +64,7 @@ int keyboard::antiColor(int x0, int y0, int x1, int y1) {
                     color[k] = 255 - visu(i, j, 0, k);
                 visu.draw_point(i, j, 0, color);
             }
+	return 0;
 }
 
 int keyboard::getPos(int x, int y) {
@@ -89,6 +91,7 @@ int keyboard::getPos(int x, int y) {
 
     //printf("Index: %d %d\n", xIndex, yIndex);
     getName(yIndex, xIndex);
+	return 0;
 }
 
 int keyboard::getName(int y, int x) {
@@ -105,6 +108,7 @@ int keyboard::getName(int y, int x) {
         displayKey("Current key is: Backspace");
         antiColor(1077, 0, 1200, 62);
     }
+	return 0;
 }
 
 int keyboard::setGesture(int gesture) {
@@ -119,6 +123,7 @@ int keyboard::setGesture(int gesture) {
 
 int keyboard::clear_trajectory() {
     head = tail;
+	return 0;
 }
 
 int keyboard::setPosXY(int x, int y) {
@@ -149,11 +154,13 @@ int keyboard::draw(int x, int y) {
     //visu.draw_circle(x, y, rad[gesture], blue);
     if (gesture == 0) draw_trajectory();
     visu.display(disp);
+	return 0;
 }
 
 int keyboard::drawMouse(int x, int y, int gesture) {
     if (gesture != 1) visu.draw_circle(x, y, rad[gesture], blue);
     else visu.draw_image(x-20, y-25, 0, 0, mouse);
+	return 0;
 }
 
 int keyboard::draw_trajectory() {
@@ -171,6 +178,7 @@ int keyboard::draw_trajectory() {
             visu.draw_line(px[i], py[i]-1, px[j], py[j]-1, blue);
         }
     }
+	return 0;
 }
 
 int keyboard::getnext(int i) {
@@ -180,9 +188,12 @@ int keyboard::getnext(int i) {
 }
 
 int keyboard::displayKey(const char *str) {
-    visu.draw_text(230, 335, str, black, white, 1, CImgList<unsigned char>::font(25));
+    visu.draw_text(230, 335, str, black, white, 1);
+	return 0;
 }
 
+
 int keyboard::displayState(const char *str) {
-    visu.draw_text(730, 335, str, black, white, 1, CImgList<unsigned char>::font(25));
+    visu.draw_text(730, 335, str, black, white, 1);
+	return 0;
 }
