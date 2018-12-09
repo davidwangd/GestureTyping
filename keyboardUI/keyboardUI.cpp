@@ -15,7 +15,8 @@ const char letters[3][11] = {"qwertyuiop", "asdfghjkl","zxcvbnm"};
 const int len[3] = {10, 9, 7};
 const int rad[3] = {10, 20, 10};
 
-keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width, height+60, 1, 3, 0), mouse("mouse.bmp"), disp(visu, "Keyboard") {
+keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width, height+60, 1, 3, 0), mouse("mouse.bmp"),
+    mouseMask("mask.bmp"), disp(visu, "Keyboard"){
     visu.fill(255).draw_image(0, 0, 0, 0, img).display(disp);
     if (trajectory_len < 10) trajectory_point_num = 10;
     else if (trajectory_len > 200) trajectory_point_num = 200;
@@ -159,7 +160,18 @@ int keyboard::draw(int x, int y) {
 
 int keyboard::drawMouse(int x, int y, int gesture) {
     if (gesture != 1) visu.draw_circle(x, y, rad[gesture], blue);
-    else visu.draw_image(x-20, y-25, 0, 0, mouse);
+    else {
+        //visu.draw_image(x-20, y-25, 0, 0, mouse);
+        unsigned char color[3];
+        for (int i = 0; i < 40; i++)
+        for (int j = 0; j < 50; j++)
+            if (mouseMask(i, j, 0, 0) != 255) {
+                color[0] = mouse(i, j, 0, 0);
+                color[1] = mouse(i, j, 0, 1);
+                color[2] = mouse(i, j, 0, 2);
+                visu.draw_point(i + x - 20, j + y - 25, 0, color);
+            }
+    }
 	return 0;
 }
 
@@ -188,12 +200,12 @@ int keyboard::getnext(int i) {
 }
 
 int keyboard::displayKey(const char *str) {
-    visu.draw_text(230, 335, str, black, white, 1);
+    visu.draw_text(230, 335, str, black, white, 1, 24);
 	return 0;
 }
 
 
 int keyboard::displayState(const char *str) {
-    visu.draw_text(730, 335, str, black, white, 1);
+    visu.draw_text(730, 335, str, black, white, 1, 24);
 	return 0;
 }

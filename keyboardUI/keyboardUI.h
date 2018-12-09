@@ -5,7 +5,7 @@
 #include<ctime>
 
 class keyboard{
-public:
+private:
     int trajectory_point_num, head, tail;
     int gesture;
     int px[205], py[205];
@@ -16,9 +16,8 @@ public:
     cimg_library::CImg<unsigned char> img;
     cimg_library::CImg<unsigned char> visu;
     cimg_library::CImg<unsigned char> mouse;
+    cimg_library::CImg<unsigned char> mouseMask;
     cimg_library::CImgDisplay disp;
-
-    keyboard(int trajectory_len = 50);
 
     void initPos();
 
@@ -38,10 +37,6 @@ public:
 
     int displayState(const char* str);
 
-    int setGesture(int gesture);
-
-    int setPosXY(int x, int y);
-
     int draw(int x, int y);
 
     int draw_trajectory();
@@ -49,6 +44,14 @@ public:
     int clear_trajectory();
 
     int getnext(int i);
+
+public:
+
+    keyboard(int trajectory_len = 50);
+
+    int setGesture(int gesture);
+
+    int setPosXY(int x, int y);
 };
 
 
