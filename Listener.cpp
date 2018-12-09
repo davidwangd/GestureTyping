@@ -1,7 +1,6 @@
 #include "Listener.h"
 #include <iostream>
 #include <cstring>
-#include <Windows.h>
 using namespace std;
 using namespace Leap;
 

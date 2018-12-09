@@ -1,7 +1,7 @@
 #ifndef LISTENER_H
 #define LISTENER_H
 #include <Leap.h>
-#include "keyboardUI\keyboardUI.h"
+#include "keyboardUI/keyboardUI.h"
 
 class MyListener : public Leap::Listener {
 public:
