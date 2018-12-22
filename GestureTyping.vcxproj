@@ -130,6 +130,7 @@
     <ClInclude Include="keyboardUI\CImg.h" />
     <ClInclude Include="keyboardUI\keyboardUI.h" />
     <ClInclude Include="Listener.h" />
+    <ClInclude Include="Point.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="keyboardUI\keyboard.bmp" />
