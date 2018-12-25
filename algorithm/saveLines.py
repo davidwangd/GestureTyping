@@ -8,7 +8,7 @@ fileOut=open('out.txt', mode='w', encoding='utf-8')
 for line in fileIn:
 	word=line.split(' ')
 	print("\n"+word[0])
-	fileOut.write("****** "+word[0]+"\n")
+	fileOut.write(word[0]+"\n")
 	wordList=[]
 	lineLen=[]
 	allLen=0
@@ -26,11 +26,11 @@ for line in fileIn:
 		lineLen.append(float((h[i]-h[i-1])**2+(w[i]-w[i-1])**2) ** 0.5)
 		allLen+=lineLen[i-1]
 		#print(lineLen[i-1])
-		fileOut.write(str(lineLen[i-1])+"\n")
+		#fileOut.write(str(lineLen[i-1])+"\n")
 	lineLen.append(0)
 	unit=allLen/49
 	allLen=0
-	fileOut.write("unit "+str(unit)+"\n")
+	#fileOut.write("unit "+str(unit)+"\n")
 
 	ansH=[]
 	ansW=[]
@@ -62,7 +62,10 @@ for line in fileIn:
 	if len(ansW)!=50:
 		if len(ansW)==49:
 			fileOut.write(str(h[-1])+" "+str(w[-1])+"\n")
-		fileOut.write("~~~\n")
-	fileOut.write(str(len(ansW))+"\n\n")
+		elif len(ansW)==1:
+			for i in range(1,50):
+				fileOut.write(str(ansH[0])+" "+str(ansW[0])+"\n")
+		#fileOut.write("~~~\n")
+	fileOut.write("\n")
 fileIn.close()
 fileOut.close()
