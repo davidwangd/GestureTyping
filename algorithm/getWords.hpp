@@ -30,9 +30,9 @@ private:
 	string inputFile;
 	int loadData()
 	{
-        Unit* pointer[30];
-        for(int i=0;i<26;i++)
-            pointer[i]=&(dataBase[i]);
+		Unit* pointer[30];
+		for(int i=0;i<26;i++)
+			pointer[i]=&(dataBase[i]);
 		int charFlag=0;
 		ifstream myfile(inputFile); 
 		string temp; 
@@ -42,8 +42,8 @@ private:
 		} 
 		while(getline(myfile,temp)) 
 		{
-            charFlag=temp[0]-'a';
-            pointer[charFlag]->word=temp;
+			charFlag=temp[0]-'a';
+			pointer[charFlag]->word=temp;
 		    for(int i=0;i<50;i++)
 		    {
 		    	if(!getline(myfile,temp,' '))
@@ -60,8 +60,8 @@ private:
 		    	pointer[charFlag]->pointW[i]=atof(temp.c_str());
                 
 		    }
-            cout<<pointer[charFlag]->word<<endl;
-            cout<<pointer[charFlag]->pointH[1]<<" "<<pointer[charFlag]->pointW[1]<<endl;
+			cout<<pointer[charFlag]->word<<endl;
+			cout<<pointer[charFlag]->pointH[1]<<" "<<pointer[charFlag]->pointW[1]<<endl;
 		    pointer[charFlag]->next=new Unit;
 		    pointer[charFlag]=pointer[charFlag]->next;
 		    getline(myfile,temp);
@@ -82,9 +82,9 @@ public:
 	Algorithm()
 	{
 		length=50;
-		inputFile="/Users/alice/Desktop/Junior/上学期/软件工程-白晓颖/git/Algorithm/Algorithm/out.txt";
+		inputFile="./out.txt";
 		memset(dataBase,0,sizeof(Unit)*30);
-        loadData();
+		loadData();
 	}
     
     int startCompute()
