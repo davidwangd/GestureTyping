@@ -10,7 +10,8 @@
 
 float Algorithm::computeDis(float x1,float x2,float y1,float y2)
 {
-    return sqrt(pow(x1-x2,2)+pow(y1-y2,2));
+    float x=sqrt(pow(x1-x2,2)+pow(y1-y2,2));
+    return x;
 }
 
 int Algorithm::loadData()
@@ -65,9 +66,9 @@ int Algorithm::loadData()
         pointer[charFlag]->centralH/=50;
         pointer[charFlag]->centralW/=50;
         
-        cout<<pointer[charFlag]->word<<endl;
-        cout<<pointer[charFlag]->centralH<<" "<<pointer[charFlag]->centralW<<endl;
-        cout<<pointer[charFlag]->minW<<" "<<pointer[charFlag]->maxW<<endl;
+        //cout<<pointer[charFlag]->word<<endl;
+        //cout<<pointer[charFlag]->centralH<<" "<<pointer[charFlag]->centralW<<endl;
+        //cout<<pointer[charFlag]->minW<<" "<<pointer[charFlag]->maxW<<endl;
         
         pointer[charFlag]->next=new Unit;
         memset(pointer[charFlag]->next,0,sizeof(Unit));
@@ -145,6 +146,7 @@ int Algorithm::computeShape()
         {
             // to be done
             pointer->shapeScore+=computeDis(pointer->NorH[i],cal.NorH[i],pointer->NorW[i],cal.NorW[i]);
+            
         }
         pointer->shapeScore/=50;
         pointer=pointer->next;
@@ -157,7 +159,7 @@ int Algorithm::cal_d(Unit *a,int input,Unit *b)
     // if any <= keyR, min<=KeyR then d(ai,b)-r<=0
     for(int i=0;i<50;i++)
     {
-        float temp=computeDis(a->NorH[input],b->NorH[i],a->NorW[input],b->NorW[i]);
+        float temp=computeDis(a->pointH[input],b->pointH[i],a->pointW[input],b->pointW[i]);
         if(temp<=keyR)
             return 0;
     }
@@ -187,9 +189,11 @@ int Algorithm::computeLocation()
         {
             int flag=calD(pointer);
             if(flag!=0)
-                pointer->posScore+=positionA[i]*computeDis(pointer->NorH[i],cal.NorH[i], pointer->NorW[i],cal.NorW[i]);
+                pointer->posScore+=positionA[i]*computeDis(pointer->pointH[i],cal.pointH[i], pointer->pointW[i],cal.pointW[i]);
         }
         pointer=pointer->next;
     }
     return 0;
 }
+
+

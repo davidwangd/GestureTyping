@@ -4,7 +4,7 @@ board_w_num=[0,4,2,2,2, 3,4,5,7,6,7, 8,6,5,8,9, 0,3,1,4,6,3, 1,1,5,0];
 #		 a b c d e  f g h i j k  l m n o p  q r s t u v  w x y z
 fileIn=open('词库.txt', mode='r', encoding='utf-8')
 fileOut=open('out.txt', mode='w', encoding='utf-8')
-
+allNum=0
 board_h=[]
 board_w=[]
 for i in range(0,len(board_h_num)):
@@ -19,6 +19,11 @@ for i in range(0,len(board_h_num)):
 for line in fileIn:
 	word=line.split(' ')
 	print("\n"+word[0])
+	if int(word[1])>100:
+		allNum+=1
+	else:
+		print("*")
+		continue
 	fileOut.write(word[0]+"\n")
 	wordList=[]
 	lineLen=[]
@@ -78,5 +83,6 @@ for line in fileIn:
 				fileOut.write(str(ansH[0])+" "+str(ansW[0])+"\n")
 		#fileOut.write("~~~\n")
 	fileOut.write("\n")
+print(allNum)
 fileIn.close()
 fileOut.close()
