@@ -1,9 +1,20 @@
 # -*- coding: utf-8 -*-
-board_h=[1,2,2,1,0, 1,1,1,0,1,1, 1,2,2,0,0, 0,0,1,0,0,2, 0,2,0,2]; #012
-board_w=[0,4,2,2,2, 3,4,5,7,6,7, 8,6,5,8,9, 0,3,1,4,6,3, 1,1,5,0];
+board_h_num=[1,2,2,1,0, 1,1,1,0,1,1, 1,2,2,0,0, 0,0,1,0,0,2, 0,2,0,2]; #012
+board_w_num=[0,4,2,2,2, 3,4,5,7,6,7, 8,6,5,8,9, 0,3,1,4,6,3, 1,1,5,0];
 #		 a b c d e  f g h i j k  l m n o p  q r s t u v  w x y z
 fileIn=open('词库.txt', mode='r', encoding='utf-8')
 fileOut=open('out.txt', mode='w', encoding='utf-8')
+
+board_h=[]
+board_w=[]
+for i in range(0,len(board_h_num)):
+	if board_h_num[i]==0:
+		board_w.append(board_w_num[i]* 77 + 115 + 39)
+	elif board_h_num[i]==1:
+		board_w.append(board_w_num[i] * 77 + 154 + 39)
+	elif board_h_num[i]==2:
+		board_w.append(board_w_num[i] * 77 + 193 + 39)
+	board_h.append(board_h_num[i]* 62 + 63+ 32)
 
 for line in fileIn:
 	word=line.split(' ')
