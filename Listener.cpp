@@ -4,12 +4,23 @@
 using namespace std;
 using namespace Leap;
 
-const float MinX = -120;
-const float MaxX = 120;
-const float MinY = 250;
-const float MaxY = 120;
+const float MinX = -150;
+const float MaxX = 150;
+const float MinY = 300;
+const float MaxY = 100;
 const int WIDTH = 1200;
 const int HEIGHT = 313;
+
+const int LeftHandIndex = 0;
+const int RightHandIndex = 1;
+
+enum {
+	Thumb = 0,
+	IndexFinger = 1,
+	MiddleFinger = 2,
+	RingFinger = 3,
+	LittleFinger = 4
+};
 
 const char ListenerMode[10][20] = {
 	"Undetected!",
@@ -18,53 +29,37 @@ const char ListenerMode[10][20] = {
 	"Waiting"
 };
 
-void MyListener::onInit(const Controller& controller) {
-	std::cout << "Initialized" << std::endl;
-}
-
-void MyListener::onConnect(const Controller& controller) {
-	std::cout << "Connected" << std::endl;
-	controller.enableGesture(Gesture::TYPE_CIRCLE);
-	controller.enableGesture(Gesture::TYPE_KEY_TAP);
-	controller.enableGesture(Gesture::TYPE_SCREEN_TAP);
-	controller.enableGesture(Gesture::TYPE_SWIPE);
-}
-
 void MyListener::processLeftHand(const Hand& hand) {
-	
+	this->leftHandMode = 0;
+	for (int i = 1;i <= 4;i++) {
+		if (checkFingerAngle(LeftHandIndex, i) <= 0.2)
+			this->leftHandMode++;
+		else break;
+	}
 }
 
 void MyListener::processRightHand(const Hand& hand) {
-	this->processBones(hand, 1);
+	this->processBones(hand, RightHandIndex);
 	// 没有找到三个指头中的任何一个
-	if (findBones[1] == 0 || findBones[2] == 0 || findBones[0] == 0) {
-		typeMode = Undetected;
-		return;
-	}
-	Finger indexFinger = hand.finger(1);
-	// 拇指和食指之间的距离小于一半食指的长度=>握拳
+
+	Finger indexFinger = hand.finger(IndexFinger);
+	// 计算食指长度
 	float length = 0;
 	for (int i = 0;i < 4;i++)
-		length += bones[1][1][i].distanceTo(bones[1][1][i + 1]);
-	//cout << bones[1][0][4] << " " << bones[1][1][4] << " " << bones[1][2][4] << " " << length << endl;
-	if (bones[1][0][4].distanceTo(bones[1][1][4]) < length / 3) {
-		typeMode = Waiting;
-	}
-	else if (bones[1][0][4].distanceTo(bones[1][2][4]) < length / 4 && bones[1][0][4].distanceTo(bones[1][1][4]) > length / 4) {
-		typeMode = Typing;
-	}
-	else if (bones[1][0][4].distanceTo(bones[1][2][4]) > length * 0.4 && bones[1][0][4].distanceTo(bones[1][1][4]) > length / 4){
+		length += bones[RightHandIndex][IndexFinger][i].distanceTo(bones[RightHandIndex][IndexFinger][i + 1]);
+	// 以自动机的形式实现状态转移判定。
+	if ((typeMode == Undetected || typeMode == Typing) && 
+			bones[RightHandIndex][Thumb][4].distanceTo(bones[RightHandIndex][MiddleFinger][4]) > length * 0.4) {
 		typeMode = Selecting;
 	}
-}
-
-void MyListener::onDisconnect(const Controller& controller) {
-	// Note: not dispatched when running in a debugger.
-	std::cout << "Disconnected" << std::endl;
-}
-
-void MyListener::onExit(const Controller& controller) {
-	std::cout << "Exited" << std::endl;
+	if (typeMode == Selecting && 
+			bones[RightHandIndex][Thumb][4].distanceTo(bones[RightHandIndex][IndexFinger][4]) < length / 2) {
+		typeMode = Waiting;
+	}
+	if (typeMode == Waiting && 
+			bones[RightHandIndex][Thumb][4].distanceTo(bones[RightHandIndex][IndexFinger][4]) > length * 0.65) {
+		typeMode = Typing;
+	}
 }
 
 inline int slice(int x, int l, int r) {
@@ -79,13 +74,20 @@ void MyListener::onFrame(const Controller& controller) {
 	memset(this->findBones, 0, sizeof(this->findBones));
 	memset(this->bones, 0, sizeof(this->bones));
 	this->preMode = this->typeMode;
-
+	int hasRightHand = 0;
 	for (HandList::const_iterator hl = hands.begin(); hl != hands.end(); ++hl) {
 		// Get the first hand
 		const Hand hand = *hl;
 		if (hand.isLeft()) processLeftHand(hand);
-		else processRightHand(hand);
+		else {
+			processRightHand(hand);
+			hasRightHand = 1;
+		}
 	}
+	if (hasRightHand == 0) {
+		this->typeMode = Undetected;
+	}
+
 	if (preMode != typeMode) {
 		cout << ListenerMode[this->typeMode] << endl;
 		board.setGesture(this->typeMode - 1);
@@ -93,15 +95,117 @@ void MyListener::onFrame(const Controller& controller) {
 	if (this->typeMode == Typing && this->preMode == Waiting) {
 		cout << "Position: " << this->bones[1][1][4] << endl;
 	}
-
 	if (this->typeMode != Undetected) {
-		int x = (this->bones[1][1][4].x - MinX) / (MaxX - MinX) * WIDTH;
-		int y = (this->bones[1][1][4].y - MinY) / (MaxY - MinY) * HEIGHT;
+		double x = (this->bones[1][1][4].x - MinX) / (MaxX - MinX) * WIDTH;
+		double y = (this->bones[1][1][4].y - MinY) / (MaxY - MinY) * HEIGHT;
 		x = slice(x, 0, WIDTH);
 		y = slice(y, 0, HEIGHT);
-		board.setPosXY(x, y);
+		board.setPosXY((int)x, (int)y);
+		if (this->typeMode == Typing) {
+			this->lock();
+			if (this->preMode != Typing) this->points.clear();
+			this->points.push_back(Point(x, y));
+			this->unlock();
+		}
 	}
+}
 
+void MyListener::lock() {
+	this->locker.lock();
+}
+void MyListener::unlock() {
+	this->locker.unlock();
+}
+
+vector<Point> MyListener::getSamplePoints(int nSamplePoints) {
+	this->lock();
+	vector<Point> cur = this->points;
+	this->unlock();
+	// 样本过于少不能进行处理
+	if (cur.size() <= nSamplePoints) return cur;
+
+	// 去除距离不正常过的噪声点
+	for (int i = 0;i + 2 < cur.size() && cur.size() > nSamplePoints; i++) {
+		double d1 = cur[i].distanceToSqr(cur[i + 1]);
+		double d2 = cur[i + 1].distanceToSqr(cur[i + 2]);
+		double pd = cur[i].distanceToSqr(cur[i + 2]);
+		// 杂声点，删除
+		if (d1 > pd * 2 && d2 > pd * 2) {
+			cur.erase(cur.begin() + i + 1);
+		}
+	}
+	if (cur.size() <= nSamplePoints) return cur;
+
+	// 按照距离进行切片处理
+	vector<double> dis = vector<double>(cur.size(), 0);
+	for (int i = 1;i < cur.size();i++) {
+		dis[i] = dis[i - 1] + cur[i].distanceTo(cur[i + 1]);
+	}
+	double slicelen = dis[cur.size() - 1] / (nSamplePoints + 1);
+	double now = 0;
+
+	for (int i = 0;i + 1 < cur.size();i++) {
+		// 将在cur[i]与cur[i+1]中
+		// 采用线性插值的方法计算中点
+		if (dis[i] <= now && dis[i + 1] >= now) {
+			// 在一定范围内不值得插值
+			if (dis[i + 1] - dis[i] < 1e-3) {
+				cur.push_back((cur[i] + cur[i + 1])*0.5);
+			} else {
+				double f = (now - dis[i]) / (dis[i + 1] - dis[i]);
+				cur.push_back(cur[i] * f + cur[i + 1] * (1 - f));
+			}
+			now += slicelen;
+		}
+	}
+	cur.push_back(cur[cur.size() - 1]);
+	return cur;
+}
+
+void MyListener::processBones(const Hand &hand, int t) {
+	FingerList fingers = hand.fingers();
+	for (FingerList::const_iterator fl = fingers.begin(); fl != fingers.end(); ++fl) {
+		const Finger finger = *fl;
+		findBones[t][finger.type()] = 1;
+		for (int b = 0; b < 4;b++) {
+			Bone::Type boneType = static_cast<Bone::Type>(b);
+			Bone bone = finger.bone(boneType);
+			this->bones[t][finger.type()][b] = bone.prevJoint();
+			if (b == 3) {
+				this->bones[t][finger.type()][4] = bone.nextJoint();
+			}
+		}
+	}
+}
+
+double MyListener::checkFingerAngle(int HandIndex, int FingerIndex) const {
+	// 手指的中间三个骨节
+	Vector a = bones[HandIndex][FingerIndex][1];
+	Vector b = bones[HandIndex][FingerIndex][2];
+	Vector c = bones[HandIndex][FingerIndex][3];
+	// 计算夹角的cos
+	double cos = (a - b).dot(b - c) / b.distanceTo(a) / b.distanceTo(c);
+	// 将弯曲程度化到0~1
+	return acos(cos) / acos(-1);
+}
+
+// 其他监听函数
+// 可以忽略
+void MyListener::onConnect(const Controller& controller) {
+	std::cout << "Connected" << std::endl;
+	controller.enableGesture(Gesture::TYPE_CIRCLE);
+	controller.enableGesture(Gesture::TYPE_KEY_TAP);
+	controller.enableGesture(Gesture::TYPE_SCREEN_TAP);
+	controller.enableGesture(Gesture::TYPE_SWIPE);
+}
+
+void MyListener::onDisconnect(const Controller& controller) {
+	// Note: not dispatched when running in a debugger.
+	std::cout << "Disconnected" << std::endl;
+}
+
+void MyListener::onExit(const Controller& controller) {
+	std::cout << "Exited" << std::endl;
 }
 
 void MyListener::onFocusGained(const Controller& controller) {
@@ -130,18 +234,6 @@ void MyListener::onServiceDisconnect(const Controller& controller) {
 	std::cout << "Service Disconnected" << std::endl;
 }
 
-void MyListener::processBones(const Hand &hand, int t) {
-	FingerList fingers = hand.fingers();
-	for (FingerList::const_iterator fl = fingers.begin(); fl != fingers.end(); ++fl) {
-		const Finger finger = *fl;
-		findBones[t][finger.type()] = 1;
-		for (int b = 0; b < 4;b++) {
-			Bone::Type boneType = static_cast<Bone::Type>(b);
-			Bone bone = finger.bone(boneType);
-			this->bones[t][finger.type()][b] = bone.prevJoint();
-			if (b == 3) {
-				this->bones[t][finger.type()][4] = bone.nextJoint();
-			}
-		}
-	}
+void MyListener::onInit(const Controller& controller) {
+	std::cout << "Initialized" << std::endl;
 }
