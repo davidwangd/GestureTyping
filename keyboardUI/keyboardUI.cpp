@@ -71,8 +71,9 @@ int keyboard::antiColor(int x0, int y0, int x1, int y1) {
 int keyboard::getPos(int x, int y) {
     int yIndex = (y - 63) / 62, xIndex;
     if (y < 63 || y >= 249) {
-        if (y >= 63 || x < 1077) return -1;
-        yIndex = -1; xIndex = 0;
+        /*if (y >= 63 || x < 1077) return -1;
+        yIndex = -1; xIndex = 0;*/
+        return -1;
     }
     else {
         switch (yIndex) {
