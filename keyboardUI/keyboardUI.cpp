@@ -15,9 +15,11 @@ const char letters[3][11] = {"qwertyuiop", "asdfghjkl","zxcvbnm"};
 const int len[3] = {10, 9, 7};
 const int rad[3] = {10, 20, 10};
 
-keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width, height+60, 1, 3, 0), mouse("mouse.bmp"),
+const int display_height = 60;
+
+keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width, display_height+height+60, 1, 3, 0), mouse("mouse.bmp"),
     mouseMask("mask.bmp"), disp(visu, "Keyboard"){
-    visu.fill(255).draw_image(0, 0, 0, 0, img).display(disp);
+    visu.fill(255).draw_image(0, 0 + display_height, 0, 0, img).display(disp);
     if (trajectory_len < 10) trajectory_point_num = 10;
     else if (trajectory_len > 200) trajectory_point_num = 200;
     else trajectory_point_num = trajectory_len;
@@ -48,7 +50,7 @@ int keyboard::highlight(int y0, int x0) {
     if (y0 == 0) x = x0 * 77 + 115;
     else if (y0 == 1) x = x0 * 77 + 154;
     else if (y0 == 2) x = x0 * 77 + 193;
-    y = y0 * 62 + 63;
+    y = y0 * 62 + 63 + display_height;
     //printf("x0: %d y0: %d\n", x, y);
 
     antiColor(x, y, x+77, y+62);
@@ -108,7 +110,7 @@ int keyboard::getName(int y, int x) {
     else {
         //puts("Backspace");
         displayKey("Current key is: Backspace");
-        antiColor(1077, 0, 1200, 62);
+        //antiColor(1077, 0, 1200, 62);
     }
 	return 0;
 }
@@ -135,8 +137,9 @@ int keyboard::setPosXY(int x, int y) {
         printf("Error! Position index out of range.\n");
         return -1;
     }
+
     if (getnext(tail) == head) head = getnext(head);
-    px[tail] = x; py[tail] = y;
+    px[tail] = x; py[tail] = y + display_height;
     pt[tail] = curTime = clock();
     //printf("time: %d\n", pt[tail]);    ///consider adding time flags here?
     tail = getnext(tail);
@@ -147,7 +150,7 @@ int keyboard::setPosXY(int x, int y) {
 }
 
 int keyboard::draw(int x, int y) {
-    visu.fill(255).draw_image(0, 0, 0, 0, img);
+    visu.fill(255).draw_image(0, 0 + display_height, 0, 0, img);
     if (gesture == 0) displayState("Current mode is: Typing");
     else if (gesture == 1) displayState("Current mode is: Selecting");
     else if (gesture == 2) displayState("Current mode is: Waiting");
@@ -160,6 +163,7 @@ int keyboard::draw(int x, int y) {
 }
 
 int keyboard::drawMouse(int x, int y, int gesture) {
+    y += display_height;
     if (gesture != 1) visu.draw_circle(x, y, rad[gesture], blue);
     else {
         //visu.draw_image(x-20, y-25, 0, 0, mouse);
@@ -201,12 +205,12 @@ int keyboard::getnext(int i) {
 }
 
 int keyboard::displayKey(const char *str) {
-    visu.draw_text(230, 335, str, black, white, 1, 24);
+    visu.draw_text(230, 335 + display_height, str, black, white, 1, 24);
 	return 0;
 }
 
 
 int keyboard::displayState(const char *str) {
-    visu.draw_text(730, 335, str, black, white, 1, 24);
+    visu.draw_text(730, 335 + display_height, str, black, white, 1, 24);
 	return 0;
 }
