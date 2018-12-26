@@ -14,11 +14,14 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
+
+#include<time.h>
 using namespace std;
 
 struct Unit
 {
     string word;
+    int times;
     float pointH[60];
     float pointW[60];
     float NorH[60];
@@ -27,6 +30,7 @@ struct Unit
     float centralH,centralW;
     float shapeScore;
     float posScore;
+    float finalScore;
     Unit* next;
 };
 
@@ -39,11 +43,17 @@ private:
     string inputFile;
     float normalizeL;
     float shapeThreshold;
+    float shapeInt;
+    float positionInt;
     float positionA[60];
     float computeDis(float x1,float x2,float y1,float y2);
     Unit cal;
+    Unit inputData;
     Unit wordList;
-
+    Unit *wordEnd;
+    void swapAB(Unit* a,Unit* b);
+    void QuickSortList(Unit* pHead,Unit* pEnd);
+    Unit* Partition(Unit* pBegin,Unit* pEnd);
     int loadData();
     int getData();
     int normalize(Unit *pointer);
@@ -63,13 +73,15 @@ public:
         length=50;
         keyR=35;
         normalizeL=100;
-        shapeThreshold=200;// to be tested***
+        shapeThreshold=100;// to be tested***
         for(int i=0;i<25;i++)
         {
             // 0.02
-            positionA[i]=0.02+(12-i)*0.001;
-            positionA[49-i]=0.02+(12-i)*0.001;
+            positionA[i]=0.02+(12-i)*0.0005;
+            positionA[49-i]=0.02+(12-i)*0.0005;
         }
+        shapeInt=100;
+        positionInt=50;
         inputFile="./out.txt";
         memset(dataBase,0,sizeof(Unit)*30);
         memset(&cal,0,sizeof(Unit));
@@ -80,39 +92,57 @@ public:
     
     void startCompute()
     {
-        // while(1)
-        //{
-            cout<<"start computing"<<endl;
-            //getData();
-            memcpy(&cal,&dataBase[1],sizeof(Unit));
+        cout<<"start computing"<<endl;
+        getData();
+        Unit *ans=&inputData;
+        while(ans->next!=NULL)
+        {
+            memcpy(&cal,ans,sizeof(Unit));
+            memset(&wordList, 0, sizeof(Unit));
             normalize(&cal);
             templatePruning();
             computeShape();
             computeLocation();
+            Integration();
             Unit *pointer=&wordList;
-            //Integration();
-        //}
-        string word1,word2;
-        int mina=10000,minb=10000;
-        while(pointer->next!=NULL)
-        {
-            if(pointer->shapeScore<mina && pointer->shapeScore!=0)
+            string word1,word2;
+            float mina=10000,minb=10000;
+            float tempa=10000,tempb=10000;
+            float finalS=0;
+            string finalW;
+            QuickSortList(&wordList,wordEnd);
+            while(pointer->next!=NULL)
             {
-                mina=pointer->shapeScore;
-                word1=pointer->word;
+                cout<<pointer->word<<endl;
+                cout<<pointer->finalScore<<endl;
+                if(pointer->shapeScore<mina||(pointer->shapeScore==mina&&tempa>pointer->posScore))
+                {
+                    mina=pointer->shapeScore;
+                    tempa=pointer->posScore;
+                    word1=pointer->word;
+                }
+                if(pointer->posScore<minb||(pointer->posScore==minb&&pointer->shapeScore<tempb))
+                {
+                    minb=pointer->posScore;
+                    tempb=pointer->shapeScore;
+                    word2=pointer->word;
+                }
+                if(finalS<pointer->finalScore)
+                {
+                    finalS=pointer->finalScore;
+                    finalW=pointer->word;
+                }
+                //cout<<pointer->word<<endl;
+                //cout<<pointer->shapeScore<<endl;
+                //cout<<pointer->posScore<<endl;
+                pointer=pointer->next;
             }
-            if(pointer->posScore<minb && pointer->posScore!=0)
-            {
-                minb=pointer->posScore;
-                word2=pointer->word;
-            }
-            cout<<pointer->word<<endl;
-            cout<<pointer->shapeScore<<endl;
-            cout<<pointer->posScore<<endl;
-            pointer=pointer->next;
+            cout<<cal.word<<endl;
+            cout<<word1<<" "<<word2<<" "<<finalW<<endl;
+            ans=ans->next;
         }
-        cout<<cal.word<<endl;
-        cout<<word1<<" "<<word2<<endl;
+
+        
     }
 
 };

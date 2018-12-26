@@ -63,6 +63,12 @@ int Algorithm::loadData()
                 pointer[charFlag]->maxW=pointer[charFlag]->pointW[i];
             
         }
+        if(!getline(myfile,temp))
+        {
+            cout<<"inputFile has sth wrong!"<<endl;
+            return -1;
+        }
+        pointer[charFlag]->times=atoi(temp.c_str());
         pointer[charFlag]->centralH/=50;
         pointer[charFlag]->centralW/=50;
         
@@ -73,6 +79,7 @@ int Algorithm::loadData()
         pointer[charFlag]->next=new Unit;
         memset(pointer[charFlag]->next,0,sizeof(Unit));
         pointer[charFlag]=pointer[charFlag]->next;
+        getline(myfile,temp);
         getline(myfile,temp);
     }
     myfile.close();
@@ -114,19 +121,20 @@ int Algorithm::templatePruning()
     Unit *ans=&wordList;
     for(int i=0;i<26;i++)
     {
-        float dis=computeDis(dataBase[i].NorH[0], cal.NorH[0], dataBase[i].NorW[0], cal.NorW[0]);
+        float dis=computeDis(dataBase[i].pointH[0], cal.pointH[0], dataBase[i].pointW[0], cal.pointW[0]);
         if(dis>shapeThreshold)
             continue;
         Unit *pointer=&dataBase[i];
         while(pointer->next!=NULL)
         {
-            dis=computeDis(pointer->NorH[49], cal.NorH[49], pointer->NorW[49], cal.NorW[49]);
+            dis=computeDis(pointer->pointH[49], cal.pointH[49], pointer->pointW[49], cal.pointW[49]);
             if(dis>shapeThreshold)
             {
                 pointer=pointer->next;
                 continue;
             }
             memcpy(ans, pointer, sizeof(Unit));
+            wordEnd=ans;
             ans->next=new Unit;
             memset(ans->next,0,sizeof(Unit));
             ans=ans->next;
@@ -196,4 +204,126 @@ int Algorithm::computeLocation()
     return 0;
 }
 
+int Algorithm::Integration()
+{
+    float head;
+    float position,shape;
+    Unit *pointer=&wordList;
+    while(pointer->next!=NULL)
+    {
+        head=-1.0/2.0*pow(pointer->posScore/positionInt,2);
+        position=1.0/(positionInt*sqrt(2*3.1415926))*exp(head);
+        head=-1.0/2.0*pow(pointer->shapeScore/shapeInt,2);
+        shape=1.0/(shapeInt*sqrt(2*3.1415926))*exp(head);
+        pointer->finalScore=shape*position*pointer->times;
+        //cout<<shape<<" "<<position<<" "<<pointer->finalScore<<endl;
+        pointer=pointer->next;
+    }
+    
+    return 0;
+}
+
+int Algorithm::getData()
+{
+    Unit* pointer=&inputData;
+    memset(pointer, 0, sizeof(Unit));
+    ifstream myfile("./Samples.txt");
+    string temp;
+    if (!myfile.is_open())
+    {
+        cout << "can not open this file" << endl;
+    }
+    while(getline(myfile,temp))
+    {
+       
+        for(int i=0;i<50;i++)
+        {
+            if(!getline(myfile,temp,' '))
+            {
+                cout<<"inputFile has sth wrong!"<<endl;
+                return -1;
+            }
+            pointer->pointW[i]=atof(temp.c_str());
+            if(!getline(myfile,temp))
+            {
+                cout<<"inputFile has sth wrong!"<<endl;
+                return -1;
+            }
+            pointer->pointH[i]=atof(temp.c_str());
+            pointer->centralW+=pointer->pointW[i];
+            pointer->centralH+=pointer->pointH[i];
+            
+            if(pointer->minH > pointer->pointH[i])
+                pointer->minH=pointer->pointH[i];
+            if(pointer->maxH < pointer->pointH[i])
+                pointer->maxH=pointer->pointH[i];
+            if(pointer->minW > pointer->pointW[i])
+                pointer->minW=pointer->pointW[i];
+            if(pointer->maxW < pointer->pointW[i])
+                pointer->maxW=pointer->pointW[i];
+            
+        }
+        pointer->centralH/=50;
+        pointer->centralW/=50;
+        
+        //cout<<pointer[charFlag]->word<<endl;
+        //cout<<pointer[charFlag]->centralH<<" "<<pointer[charFlag]->centralW<<endl;
+        //cout<<pointer[charFlag]->minW<<" "<<pointer[charFlag]->maxW<<endl;
+        
+        pointer->next=new Unit;
+        memset(pointer->next,0,sizeof(Unit));
+        pointer=pointer->next;
+        getline(myfile,temp);
+    }
+    myfile.close();
+    return 0;
+}
+
+
+
+void Algorithm::QuickSortList(Unit* pHead,Unit* pEnd)
+{
+    if(pHead != pEnd)
+    {
+        Unit* part = Partition(pHead,pEnd);
+        QuickSortList(pHead,part);
+        QuickSortList(part->next,pEnd);
+        
+    }
+}
+
+void Algorithm::swapAB(Unit* a,Unit* b)
+{
+    Unit temp;
+    Unit *oldA=a->next;
+    Unit *oldB=b->next;
+    memcpy(&temp,a,sizeof(Unit));
+    memcpy(a,b,sizeof(Unit));
+    memcpy(b,&temp,sizeof(Unit));
+    a->next=oldA;
+    b->next=oldB;
+}
+
+Unit* Algorithm::Partition(Unit* pBegin,Unit* pEnd)
+{
+    
+    float key = pBegin->finalScore;
+    Unit* pSlow = pBegin;
+    Unit* pFast = pSlow->next;
+    Unit* temp = pBegin;
+    
+    while(pFast!=NULL&&pFast!=pEnd->next)
+    {
+        if(pFast->finalScore>key)
+        {
+            temp = pSlow;
+            pSlow = pSlow->next;
+            swapAB(pSlow,pFast);
+        }
+        
+        pFast = pFast->next;
+    }
+    swapAB(pSlow,pBegin);
+    return temp;//返回的结点为支点节点的前一个结点
+    }
 

@@ -82,6 +82,7 @@ for line in fileIn:
 			for i in range(1,50):
 				fileOut.write(str(ansH[0])+" "+str(ansW[0])+"\n")
 		#fileOut.write("~~~\n")
+	fileOut.write(word[1]+"\n")
 	fileOut.write("\n")
 print(allNum)
 fileIn.close()
