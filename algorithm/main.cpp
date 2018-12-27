@@ -13,5 +13,6 @@ using namespace std;
 int main(int argc, const char * argv[]) {
     // insert code here...
     Algorithm *input=new Algorithm;
+    input->startCompute();
     return 0;
 }
