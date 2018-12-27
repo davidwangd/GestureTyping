@@ -3,6 +3,9 @@
 
 #include "CImg.h"
 #include<ctime>
+#include<vector>
+#include<string>
+#include<iostream>
 
 class keyboard{
 private:
@@ -12,6 +15,8 @@ private:
     clock_t pt[205];
     clock_t curTime;
     int posx[200], posy[200];
+
+    char words[6][20];
 
     cimg_library::CImg<unsigned char> img;
     cimg_library::CImg<unsigned char> visu;
@@ -44,6 +49,12 @@ private:
     int clear_trajectory();
 
     int getnext(int i);
+
+    int feedWordlist(std::vector<std::string>wordlist);
+
+    int updateWordlist();
+
+    int displayWordlist();
 
 public:
 

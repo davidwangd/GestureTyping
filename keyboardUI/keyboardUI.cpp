@@ -158,6 +158,8 @@ int keyboard::draw(int x, int y) {
     drawMouse(x, y, gesture);
     //visu.draw_circle(x, y, rad[gesture], blue);
     if (gesture == 0) draw_trajectory();
+
+    updateWordlist();
     visu.display(disp);
 	return 0;
 }
@@ -213,4 +215,21 @@ int keyboard::displayKey(const char *str) {
 int keyboard::displayState(const char *str) {
     visu.draw_text(730, 335 + display_height, str, black, white, 1, 24);
 	return 0;
+}
+
+int keyboard::feedWordlist(std::vector<std::string> wordlist) {
+    std::cout << wordlist.size() << wordlist[0] << std::endl;
+    return 0;
+}
+
+int keyboard::updateWordlist() {
+    std::vector<std::string> words;
+    words.push_back("Hello world!");
+    words.push_back("PPAP!");
+    feedWordlist(words);
+    return 0;
+}
+
+int keyboard::displayWordlist() {
+    return 0;
 }
