@@ -5,7 +5,7 @@ using namespace cimg_library;
 
 const int height = 320, width = 1201;
 
-const int limit = 2000;
+const int limit = 100000;
 
 const unsigned char red[] = { 255, 0, 0 }, green[] = { 0, 255, 0 }, blue[] = { 0, 0, 255 };
 
@@ -32,6 +32,12 @@ keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width + lrMargi
     words = new char*[MAX_WORD_NUM];
     for (int i = 0; i < MAX_WORD_NUM; i++) words[i] = new char[MAX_WORD_LEN];
     initPos();
+}
+
+keyboard::~keyboard() {
+    printf("Destroying keyboard object");
+    for (int i = 0; i < MAX_WORD_NUM; i++) delete [] words[i];
+    delete words;
 }
 
 void keyboard::initPos() {
@@ -144,22 +150,20 @@ int keyboard::setPosXY(int x, int y) {
     //printf("xy: %d %d\n", x, y);
     //if (tail == trajectory_point_num - 1 || tail + 1 == head) head = (head + 1) % trajectory_point_num;
     pthread_mutex_lock(&gestureLock);
+    pthread_mutex_lock(&trajLock);
     if (!bounded(x, y)) {
         printf("Error! Position index out of range.\n");
         return -1;
     }
 
     if (getnext(tail) == head) head = getnext(head);
-
-    pthread_mutex_lock(&trajLock);
     px[tail] = x + lrMargin; py[tail] = y + display_height;
     pt[tail] = curTime = clock();
-    pthread_mutex_unlock(&trajLock);
     //printf("time: %d\n", pt[tail]);    ///consider adding time flags here?
     tail = getnext(tail);
-
     draw(x, y);
 
+    pthread_mutex_unlock(&trajLock);
     pthread_mutex_unlock(&gestureLock);
 
     return 0;
@@ -234,10 +238,11 @@ int keyboard::displayState(const char *str) {
 }
 
 int keyboard::setwords(char **wordlist, int wordnum, bool isFinal) {
-    pthread_mutex_lock(&wordsLock);
+    pthread_mutex_lock(&trajLock);
+    if (wordnum > 5) wordnum = 5;
+    if (wordnum < 0) wordnum = 0;
 
-    ///
-    pthread_mutex_unlock(&wordsLock);
+    for (int i = 0; i < wordnum; i++) strcpy(words[i], wordlist[i]);
     selectingWords = isFinal;
     this->wordnum = wordnum;
     if (isFinal) {
@@ -246,16 +251,19 @@ int keyboard::setwords(char **wordlist, int wordnum, bool isFinal) {
     else {
         drawMiddleResults();
     }
+    pthread_mutex_unlock(&trajLock);
 }
 
 int keyboard::drawMiddleResults() {
     printf("Drawing middle results!\n");
+    for (int i = 0; i < wordnum; i++) printf("%s\n", words[i]);
 }
 
 int keyboard::createButtons() {
     printf("Creating Buttons!\n");
+    for (int i = 0; i < wordnum; i++) printf("%s\n", words[i]);
 }
 
-pthread_mutex_t keyboard::getWordsLock() {
-    return wordsLock;
+void Button::setWord(char *word) {
+    //option.draw_text(0, 0, word, 0, black, white, 1, 20);
 }

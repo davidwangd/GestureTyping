@@ -11,6 +11,13 @@
 #define MAX_WORD_NUM 5
 #define MAX_WORD_LEN 30
 
+class Button{
+private:
+    cimg_library::CImg<unsigned char> option;
+public:
+    void setWord(char *word);
+};
+
 class keyboard{
 private:
     int trajectory_point_num, head, tail;
@@ -24,7 +31,7 @@ private:
     int wordnum;
     bool selectingWords;
 
-    pthread_mutex_t trajLock, gestureLock, wordsLock;
+    pthread_mutex_t trajLock, gestureLock;
 
     cimg_library::CImg<unsigned char> img;
     cimg_library::CImg<unsigned char> visu;
@@ -72,7 +79,7 @@ public:
 
     int setwords(char **wordlist, int wordnum, bool isFinal);
 
-    pthread_mutex_t getWordsLock();
+    ~keyboard();
 };
 
 
