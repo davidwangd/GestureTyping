@@ -14,7 +14,8 @@ struct Point {
 	friend double dot(const Point &a, const Point &b);
 	double distanceTo(const Point &other) const {
 		Point tmp = *this - other;
-		return sqrt(dot(tmp, tmp));
+		double x=dot(tmp,tmp);
+		return sqrt(x);
 	}
 	double distanceToSqr(const Point &other) const {
 		Point tmp = *this - other;

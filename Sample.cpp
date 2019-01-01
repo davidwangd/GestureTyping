@@ -231,7 +231,6 @@ int main(int argc, char** argv) {
   Controller controller;
 
   pthread_t  t;
- // t=AlgorithmThread;
   pthread_create(&t, NULL, &AlgorithmThread, NULL);
 
   controller.addListener(listener);
