@@ -132,7 +132,11 @@ int keyboard::getName(int y, int x) {
 int keyboard::setGesture(int gesture) {
     pthread_mutex_lock(&gestureLock);
     pthread_mutex_lock(&trajLock);
-    if (gesture < 0 || gesture > 2) {
+    if (gesture < 0) {
+        selectingWords = false;
+        return 0;
+    }
+    if (gesture > 2) {
         printf("Error! Gesture number out of range.\n");
         return -1;
     }
