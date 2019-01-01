@@ -17,9 +17,11 @@ const int rad[3] = {10, 20, 10};
 
 const int display_height = 60;
 
-keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width, display_height+height+60, 1, 3, 0), mouse("mouse.bmp"),
+const int lrMargin = 60;
+
+keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width + lrMargin * 2, display_height+height+60, 1, 3, 0), mouse("mouse.bmp"),
     mouseMask("mask.bmp"), disp(visu, "Keyboard"){
-    visu.fill(255).draw_image(0, 0 + display_height, 0, 0, img).display(disp);
+    visu.fill(255).draw_image(0 + lrMargin, 0 + display_height, 0, 0, img).display(disp);
     if (trajectory_len < 10) trajectory_point_num = 10;
     else if (trajectory_len > 200) trajectory_point_num = 200;
     else trajectory_point_num = trajectory_len;
@@ -140,7 +142,7 @@ int keyboard::setPosXY(int x, int y) {
     }
 
     if (getnext(tail) == head) head = getnext(head);
-    px[tail] = x; py[tail] = y + display_height;
+    px[tail] = x + lrMargin; py[tail] = y + display_height;
     pt[tail] = curTime = clock();
     //printf("time: %d\n", pt[tail]);    ///consider adding time flags here?
     tail = getnext(tail);
@@ -151,7 +153,7 @@ int keyboard::setPosXY(int x, int y) {
 }
 
 int keyboard::draw(int x, int y) {
-    visu.fill(255).draw_image(0, 0 + display_height, 0, 0, img);
+    visu.fill(255).draw_image(0 + lrMargin, 0 + display_height, 0, 0, img);
     if (gesture == 0) displayState("Current mode is: Typing");
     else if (gesture == 1) displayState("Current mode is: Selecting");
     else if (gesture == 2) displayState("Current mode is: Waiting");
@@ -166,6 +168,7 @@ int keyboard::draw(int x, int y) {
 
 int keyboard::drawMouse(int x, int y, int gesture) {
     y += display_height;
+    x += lrMargin;
     if (gesture != 1) visu.draw_circle(x, y, rad[gesture], blue);
     else {
         //visu.draw_image(x-20, y-25, 0, 0, mouse);
