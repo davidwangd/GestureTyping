@@ -145,7 +145,8 @@ int keyboard::setGesture(int gesture) {
     if (gesture == 2) {
         if (selectingWords) {
             printf("Selecting words!\n");
-            int x0 = px[tail], y0 = py[tail];
+            int thatTime = head;
+            int x0 = px[thatTime], y0 = py[thatTime];
             printf("%d %d\n", x0, y0);
             for (int i = 0; i < wordnum; i++) {
                 printf("%d %d %d %d\n", buttons[i].x, buttons[i].y, buttons[i].w, buttons[i].h);
