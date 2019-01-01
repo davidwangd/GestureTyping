@@ -23,7 +23,7 @@ keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width + lrMargi
     mouseMask("mask.bmp"), disp(visu, "Keyboard"){
     visu.fill(51).draw_image(0 + lrMargin, 0 + display_height, 0, 0, img).display(disp);
     if (trajectory_len < 10) trajectory_point_num = 10;
-    else if (trajectory_len > 200) trajectory_point_num = 200;
+    else if (trajectory_len > 400) trajectory_point_num = 400;
     else trajectory_point_num = trajectory_len;
     head = tail = 0;
     gesture = 0;

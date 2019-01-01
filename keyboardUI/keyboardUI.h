@@ -28,10 +28,10 @@ class keyboard{
 private:
     int trajectory_point_num, head, tail;
     int gesture;
-    int px[205], py[205];
-    clock_t pt[205];
+    int px[405], py[405];
+    clock_t pt[405];
     clock_t curTime;
-    int posx[200], posy[200];
+    int posx[400], posy[400];
 
     char** words;
     int wordnum;
@@ -87,7 +87,7 @@ private:
 
 public:
 
-    keyboard(int trajectory_len = 50);
+    keyboard(int trajectory_len = 400);
 
     int setGesture(int gesture);
 
