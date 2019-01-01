@@ -44,14 +44,14 @@ void MyListener::processLeftHand(const Hand& hand) {
 
 void MyListener::processRightHand(const Hand& hand) {
 	this->processBones(hand, RightHandIndex);
-	// Ã»ÓĞÕÒµ½Èı¸öÖ¸Í·ÖĞµÄÈÎºÎÒ»¸ö
+	// æ²¡æœ‰æ‰¾åˆ°ä¸‰ä¸ªæŒ‡å¤´ä¸­çš„ä»»ä½•ä¸€ä¸ª
 
 	Finger indexFinger = hand.finger(IndexFinger);
-	// ¼ÆËãÊ³Ö¸³¤¶È
+	// è®¡ç®—é£ŸæŒ‡é•¿åº¦
 	float length = 0;
 	for (int i = 0;i < 4;i++)
 		length += bones[RightHandIndex][IndexFinger][i].distanceTo(bones[RightHandIndex][IndexFinger][i + 1]);
-	// ÒÔ×Ô¶¯»úµÄĞÎÊ½ÊµÏÖ×´Ì¬×ªÒÆÅĞ¶¨¡£
+	// ä»¥è‡ªåŠ¨æœºçš„å½¢å¼å®ç°çŠ¶æ€è½¬ç§»åˆ¤å®šã€‚
 	if ((typeMode == Undetected || typeMode == Typing) && 
 			bones[RightHandIndex][Thumb][4].distanceTo(bones[RightHandIndex][MiddleFinger][4]) > length * 0.4) {
 		typeMode = Selecting;
@@ -145,26 +145,26 @@ vector<Point> MyListener::getSamplePoints(int nSamplePoints) {
 	vector<Point> cur = this->points;
 	this->unlock();
 
-	// Ñù±¾¹ıÓÚÉÙ²»ÄÜ½øĞĞ´¦Àí
+	// æ ·æœ¬è¿‡äºå°‘ä¸èƒ½è¿›è¡Œå¤„ç†
 	if (cur.size() <= nSamplePoints) 
 	{
 		//printf("[getSamplePoints] cur.size() %d\n",cur.size());
 		return cur;
 	}
 	vector<Point> ret;
-	// È¥³ı¾àÀë²»Õı³£¹ıµÄÔëÉùµã
+	// å»é™¤è·ç¦»ä¸æ­£å¸¸è¿‡çš„å™ªå£°ç‚¹
 	for (int i = 0;i + 2 < cur.size() && cur.size() > nSamplePoints; i++) {
 		double d1 = cur[i].distanceToSqr(cur[i + 1]);
 		double d2 = cur[i + 1].distanceToSqr(cur[i + 2]);
 		double pd = cur[i].distanceToSqr(cur[i + 2]);
-		// ÔÓÉùµã£¬É¾³ı
+		// æ‚å£°ç‚¹ï¼Œåˆ é™¤
 		if (d1 > pd * 2 && d2 > pd * 2) {
 			cur.erase(cur.begin() + i + 1);
 		}
 	}
 	if (cur.size() <= nSamplePoints) return cur;
 
-	// °´ÕÕ¾àÀë½øĞĞÇĞÆ¬´¦Àí
+	// æŒ‰ç…§è·ç¦»è¿›è¡Œåˆ‡ç‰‡å¤„ç†
 	vector<double> dis = vector<double>(cur.size(), 0);
 	for (int i = 1;i < cur.size();i++) {
 		dis[i] = dis[i - 1] + cur[i].distanceTo(cur[i - 1]);
@@ -175,10 +175,10 @@ vector<Point> MyListener::getSamplePoints(int nSamplePoints) {
 
 	double now = 0;
 	for (int i = 0;i + 1 < cur.size();) {
-		// ½«ÔÚcur[i]Óëcur[i+1]ÖĞ
-		// ²ÉÓÃÏßĞÔ²åÖµµÄ·½·¨¼ÆËãÖĞµã
+		// å°†åœ¨cur[i]ä¸cur[i+1]ä¸­
+		// é‡‡ç”¨çº¿æ€§æ’å€¼çš„æ–¹æ³•è®¡ç®—ä¸­ç‚¹
 		if (dis[i] <= now && dis[i + 1] >= now) {
-			// ÔÚÒ»¶¨·¶Î§ÄÚ²»ÖµµÃ²åÖµ
+			// åœ¨ä¸€å®šèŒƒå›´å†…ä¸å€¼å¾—æ’å€¼
 			if (dis[i + 1] - dis[i] < 1e-3) {
 				ret.push_back((cur[i] + cur[i + 1])*0.5);
 			} else {
@@ -216,18 +216,18 @@ void MyListener::processBones(const Hand &hand, int t) {
 }
 
 double MyListener::checkFingerAngle(int HandIndex, int FingerIndex) const {
-	// ÊÖÖ¸µÄÖĞ¼äÈı¸ö¹Ç½Ú
+	// æ‰‹æŒ‡çš„ä¸­é—´ä¸‰ä¸ªéª¨èŠ‚
 	Vector a = bones[HandIndex][FingerIndex][1];
 	Vector b = bones[HandIndex][FingerIndex][2];
 	Vector c = bones[HandIndex][FingerIndex][3];
-	// ¼ÆËã¼Ğ½ÇµÄcos
+	// è®¡ç®—å¤¹è§’çš„cos
 	double cos = (a - b).dot(b - c) / b.distanceTo(a) / b.distanceTo(c);
-	// ½«ÍäÇú³Ì¶È»¯µ½0~1
+	// å°†å¼¯æ›²ç¨‹åº¦åŒ–åˆ°0~1
 	return acos(cos) / acos(-1);
 }
 
-// ÆäËû¼àÌıº¯Êı
-// ¿ÉÒÔºöÂÔ
+// å…¶ä»–ç›‘å¬å‡½æ•°
+// å¯ä»¥å¿½ç•¥
 void MyListener::onConnect(const Controller& controller) {
 	std::cout << "Connected" << std::endl;
 	controller.enableGesture(Gesture::TYPE_CIRCLE);

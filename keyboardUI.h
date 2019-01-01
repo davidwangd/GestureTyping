@@ -3,6 +3,26 @@
 
 #include "CImg.h"
 #include<ctime>
+#include<vector>
+#include<string>
+#include<iostream>
+#include<pthread.h>
+
+#include "TextDisplay.h"
+
+#define MAX_WORD_NUM 5
+#define MAX_WORD_LEN 30
+
+class Button{
+public:
+    cimg_library::CImg<unsigned char> option;
+    int x, y;
+    int w, h;
+    int fw, fh;
+    char *wd;
+    void setWord(char *word);
+    void setPos(int x, int y);
+};
 
 class keyboard{
 private:
@@ -12,6 +32,16 @@ private:
     clock_t pt[205];
     clock_t curTime;
     int posx[200], posy[200];
+
+    char** words;
+    int wordnum;
+    bool selectingWords;
+
+    TextDisplay output;
+
+    Button buttons[MAX_WORD_NUM];
+
+    pthread_mutex_t trajLock, gestureLock;
 
     cimg_library::CImg<unsigned char> img;
     cimg_library::CImg<unsigned char> visu;
@@ -45,6 +75,16 @@ private:
 
     int getnext(int i);
 
+    int drawMiddleResults();
+
+    int createButtons();
+
+    void paint(Button &button);
+
+    void getButton(int x, int y);
+
+    void sendword(char *word);
+
 public:
 
     keyboard(int trajectory_len = 50);
@@ -52,6 +92,10 @@ public:
     int setGesture(int gesture);
 
     int setPosXY(int x, int y);
+
+    int setwords(char **wordlist, int wordnum, bool isFinal);
+
+    ~keyboard();
 };
 
 

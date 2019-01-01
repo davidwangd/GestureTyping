@@ -118,35 +118,44 @@ int Algorithm::norList(Unit *pointer)
 
 int Algorithm::templatePruning()
 {
-    Unit *ans=&wordList;
+    //printf("[templatePruning]\n");
+    int allNUM=0;
+    int wordNUM=0;
+    Unit *ans=wordListNEW;
     for(int i=0;i<26;i++)
     {
         float dis=computeDis(dataBase[i].pointH[0], cal.pointH[0], dataBase[i].pointW[0], cal.pointW[0]);
+        //printf("[templatePruning] %f\n",dis );
         if(dis>shapeThreshold)
             continue;
         Unit *pointer=&dataBase[i];
         while(pointer->next!=NULL)
         {
+            wordNUM++;
             dis=computeDis(pointer->pointH[49], cal.pointH[49], pointer->pointW[49], cal.pointW[49]);
             if(dis>shapeThreshold)
             {
                 pointer=pointer->next;
                 continue;
             }
+            allNUM++;
             memcpy(ans, pointer, sizeof(Unit));
             wordEnd=ans;
-            ans->next=new Unit;
+            mempointer++;
+            ans->next=&wordListNEW[mempointer];
             memset(ans->next,0,sizeof(Unit));
             ans=ans->next;
             pointer=pointer->next;
         }
     }
-    return 0;
+    printf("[templatePruning] num: %d %d\n",allNUM,wordNUM );
+    return allNUM;
 }
 
 int Algorithm::computeShape()
 {
-    Unit *pointer=&wordList;
+    //printf("[computeShape]\n");
+    Unit *pointer=wordListNEW;
     while(pointer->next!=NULL)
     {
         pointer->shapeScore=0;
@@ -189,7 +198,8 @@ int Algorithm::calD(Unit *input)
 
 int Algorithm::computeLocation()
 {
-    Unit *pointer=&wordList;
+    //printf("[computeLocationn]\n");
+    Unit *pointer=wordListNEW;
     while(pointer->next!=NULL)
     {
         pointer->posScore=0;
@@ -206,16 +216,18 @@ int Algorithm::computeLocation()
 
 int Algorithm::Integration()
 {
+    //printf("[Integration]\n");
     float head;
     float position,shape;
-    Unit *pointer=&wordList;
+    Unit *pointer=wordListNEW;
     while(pointer->next!=NULL)
     {
         head=-1.0/2.0*pow(pointer->posScore/positionInt,2);
         position=1.0/(positionInt*sqrt(2*3.1415926))*exp(head);
         head=-1.0/2.0*pow(pointer->shapeScore/shapeInt,2);
         shape=1.0/(shapeInt*sqrt(2*3.1415926))*exp(head);
-        pointer->finalScore=shape*position*pointer->times;
+        pointer->finalScore=shape*position;
+        //pointer->finalScore=shape*position*pointer->times;
         //cout<<shape<<" "<<position<<" "<<pointer->finalScore<<endl;
         pointer=pointer->next;
     }
@@ -225,94 +237,98 @@ int Algorithm::Integration()
 
 int Algorithm::getData()
 {
-    Unit* pointer=&inputData;
+    Unit* pointer=&cal;
     memset(pointer, 0, sizeof(Unit));
     
-	/**
-	 * 为了和之前的兼容
-	 * 实际上只调用else分支的数据处理
-	 */
-	if (this->listener == nullptr) {
-
-		ifstream myfile("./Samples.txt");
-		string temp;
-		if (!myfile.is_open())
-		{
-			cout << "can not open this file" << endl;
-		}
-		while (getline(myfile, temp))
-		{
-
-			for (int i = 0;i < 50;i++)
-			{
-				if (!getline(myfile, temp, ' '))
-				{
-					cout << "inputFile has sth wrong!" << endl;
-					return -1;
-				}
-				pointer->pointW[i] = atof(temp.c_str());
-				if (!getline(myfile, temp))
-				{
-					cout << "inputFile has sth wrong!" << endl;
-					return -1;
-				}
-				pointer->pointH[i] = atof(temp.c_str());
-				pointer->centralW += pointer->pointW[i];
-				pointer->centralH += pointer->pointH[i];
-
-				if (pointer->minH > pointer->pointH[i])
-					pointer->minH = pointer->pointH[i];
-				if (pointer->maxH < pointer->pointH[i])
-					pointer->maxH = pointer->pointH[i];
-				if (pointer->minW > pointer->pointW[i])
-					pointer->minW = pointer->pointW[i];
-				if (pointer->maxW < pointer->pointW[i])
-					pointer->maxW = pointer->pointW[i];
-
-			}
-			pointer->centralH /= 50;
-			pointer->centralW /= 50;
-
-			//cout<<pointer[charFlag]->word<<endl;
-			//cout<<pointer[charFlag]->centralH<<" "<<pointer[charFlag]->centralW<<endl;
-			//cout<<pointer[charFlag]->minW<<" "<<pointer[charFlag]->maxW<<endl;
-
-			pointer->next = new Unit;
-			memset(pointer->next, 0, sizeof(Unit));
-			pointer = pointer->next;
-			getline(myfile, temp);
-		}
-		myfile.close();
-	}
-	else {
-		// TODO: 
-		vector<Point> points = this->listener->getSamplePoints();
-		
-		//points: 保证长度为50的vector数组。
-		//Point: double x,y; 分别是给出的坐标的第一维和第二维。
-		//需要使用这种方式来得到所有的数据。
-		for (int i = 0;i < 50;i++)
-		{
-			pointer->pointW[i] = (float)points[i].x;
-			pointer->pointH[i] = (float)points[i].y;
-			pointer->centralW += pointer->pointW[i];
-			pointer->centralH += pointer->pointH[i];
-			if (pointer->minH > pointer->pointH[i])
-				pointer->minH = pointer->pointH[i];
-			if (pointer->maxH < pointer->pointH[i])
-				pointer->maxH = pointer->pointH[i];
-			if (pointer->minW > pointer->pointW[i])
-				pointer->minW = pointer->pointW[i];
-			if (pointer->maxW < pointer->pointW[i])
-				pointer->maxW = pointer->pointW[i];
-		}
-		// 有且仅有一个数据点，根据这个数据点进行后续的计算。
-		pointer->centralH /= 50;
-		pointer->centralW /= 50;
-		pointer->next = new Unit;
-		pointer->next->next = NULL;
-	}
-	return 0;
+    /**
+     * 为了和之前的兼容
+     * 实际上只调用else分支的数据处理
+     */
+    if (this->listener == nullptr) {
+        
+        ifstream myfile("./Samples.txt");
+        string temp;
+        if (!myfile.is_open())
+        {
+            cout << "can not open this file" << endl;
+        }
+        while (getline(myfile, temp))
+        {
+            
+            for (int i = 0;i < 50;i++)
+            {
+                if (!getline(myfile, temp, ' '))
+                {
+                    cout << "inputFile has sth wrong!" << endl;
+                    return -1;
+                }
+                pointer->pointW[i] = atof(temp.c_str());
+                if (!getline(myfile, temp))
+                {
+                    cout << "inputFile has sth wrong!" << endl;
+                    return -1;
+                }
+                pointer->pointH[i] = atof(temp.c_str());
+                pointer->centralW += pointer->pointW[i];
+                pointer->centralH += pointer->pointH[i];
+                
+                if (pointer->minH > pointer->pointH[i])
+                    pointer->minH = pointer->pointH[i];
+                if (pointer->maxH < pointer->pointH[i])
+                    pointer->maxH = pointer->pointH[i];
+                if (pointer->minW > pointer->pointW[i])
+                    pointer->minW = pointer->pointW[i];
+                if (pointer->maxW < pointer->pointW[i])
+                    pointer->maxW = pointer->pointW[i];
+                
+            }
+            pointer->centralH /= 50;
+            pointer->centralW /= 50;
+            
+            //cout<<pointer[charFlag]->word<<endl;
+            //cout<<pointer[charFlag]->centralH<<" "<<pointer[charFlag]->centralW<<endl;
+            //cout<<pointer[charFlag]->minW<<" "<<pointer[charFlag]->maxW<<endl;
+            
+            pointer->next = new Unit;
+            memset(pointer->next, 0, sizeof(Unit));
+            pointer = pointer->next;
+            getline(myfile, temp);
+        }
+        myfile.close();
+    }
+    else {
+        // TODO:
+        //cout<<"[getData] leap motion\n";
+        vector<Point> points = this->listener->getSamplePoints();
+        int length=points.size();
+        if(length<50)
+            return -1;
+        printf("[getData] size ok\n");
+        //points: 保证长度为50的vector数组。
+        //Point: double x,y; 分别是给出的坐标的第一维和第二维。
+        //需要使用这种方式来得到所有的数据。
+        for (int i = 0;i < 50;i++)
+        {
+            pointer->pointW[i]=points[i].x;
+            pointer->pointH[i]=points[i].y;
+            pointer->centralW += pointer->pointW[i];
+            pointer->centralH += pointer->pointH[i];
+            if (pointer->minH > pointer->pointH[i])
+                pointer->minH = pointer->pointH[i];
+            if (pointer->maxH < pointer->pointH[i])
+                pointer->maxH = pointer->pointH[i];
+            if (pointer->minW > pointer->pointW[i])
+                pointer->minW = pointer->pointW[i];
+            if (pointer->maxW < pointer->pointW[i])
+                pointer->maxW = pointer->pointW[i];
+        }
+        // 有且仅有一个数据点，根据这个数据点进行后续的计算。
+        pointer->centralH /= 50;
+        pointer->centralW /= 50;
+        pointer->next = new Unit;
+        pointer->next->next = NULL;
+    }
+    return 0;
 }
 
 

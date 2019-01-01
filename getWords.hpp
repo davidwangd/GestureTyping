@@ -50,13 +50,17 @@ private:
     float positionInt;
     float positionA[60];
     float computeDis(float x1,float x2,float y1,float y2);
+    char *output[6];
+    int outputNUM;
     Unit cal;
     Unit inputData;
-    Unit wordList;
+    //Unit wordList;
+    Unit wordListNEW[20000];
+    int mempointer;
     Unit *wordEnd;
-	// 保留LeapMotion和UI的接口。
-	MyListener *listener;
-	keyboard* ui;
+    // 保留LeapMotion和UI的接口。
+    MyListener *listener;
+    keyboard* ui;
     void swapAB(Unit* a,Unit* b);
     void QuickSortList(Unit* pHead,Unit* pEnd);
     Unit* Partition(Unit* pBegin,Unit* pEnd);
@@ -66,24 +70,28 @@ private:
     int norList(Unit *pointer);
     int templatePruning();
     int computeShape();
-
+    
     int cal_d(Unit *a,int i,Unit *b);
     int calD(Unit *input);
     int computeLocation();
-
+    
     int Integration();
-
+    
+    int preState;
+    int nowState;
+    
 public:
-	/**
-	 * Modified by DavidWang
-	 * 2018/12/27
-	 * 增加两个默认参数，为了和之前的代码兼容加入了默认值
-	 * 在实际使用中必须有合法值
-	 */
-	Algorithm(MyListener* listener = nullptr, keyboard *ui = nullptr)
-	{
-		this->listener = listener;
-		this->ui = ui;
+    /**
+     * Modified by DavidWang
+     * 2018/12/27
+     * 增加两个默认参数，为了和之前的代码兼容加入了默认值
+     * 在实际使用中必须有合法值
+     */
+    Algorithm(MyListener* listener = nullptr, keyboard *ui = nullptr)
+    {
+        mempointer=0;
+        this->listener = listener;
+        this->ui = ui;
         length=50;
         keyR=35;
         normalizeL=100;
@@ -96,69 +104,88 @@ public:
         }
         shapeInt=100;
         positionInt=50;
-        inputFile="./out.txt";
+        inputFile="out.txt";
         memset(dataBase,0,sizeof(Unit)*30);
         memset(&cal,0,sizeof(Unit));
-        memset(&wordList,0,sizeof(Unit));
+        //memset(&wordList,0,sizeof(Unit));
         loadData();
+        preState=this->listener->getState();
+        nowState=preState;
+        for(int i=0;i<6;i++)
+            output[i]=new char[50];
         cout<<"ini FINISHED~"<<endl;
-	}
+    }
     
     void startCompute()
     {
-        cout<<"start computing"<<endl;
-        getData();
-        Unit *ans=&inputData;
-        while(ans->next!=NULL)
+        //cout<<"start computing"<<endl;
+        int temp=this->listener->getState();
+        if(temp!=-1)
+            nowState=temp;
+        else
+            return;
+        // 0 type  1 select  2 waiting
+        
+        // 2 2   2 0  0 0   0 1   1 1  1 2
+        // unnormal 2 1  0 2  1 0
+        //       waiting  select   type waiting  select  type
+        // final
+        if(preState==-1)
         {
-            memcpy(&cal,ans,sizeof(Unit));
-            memset(&wordList, 0, sizeof(Unit));
-            normalize(&cal);
-            templatePruning();
-            computeShape();
-            computeLocation();
-            Integration();
-            Unit *pointer=&wordList;
-            string word1,word2;
-            float mina=10000,minb=10000;
-            float tempa=10000,tempb=10000;
-            float finalS=0;
-            string finalW;
-            QuickSortList(&wordList,wordEnd);
-            while(pointer->next!=NULL)
-            {
-                cout<<pointer->word<<endl;
-                cout<<pointer->finalScore<<endl;
-                if(pointer->shapeScore<mina||(pointer->shapeScore==mina&&tempa>pointer->posScore))
-                {
-                    mina=pointer->shapeScore;
-                    tempa=pointer->posScore;
-                    word1=pointer->word;
-                }
-                if(pointer->posScore<minb||(pointer->posScore==minb&&pointer->shapeScore<tempb))
-                {
-                    minb=pointer->posScore;
-                    tempb=pointer->shapeScore;
-                    word2=pointer->word;
-                }
-                if(finalS<pointer->finalScore)
-                {
-                    finalS=pointer->finalScore;
-                    finalW=pointer->word;
-                }
-                //cout<<pointer->word<<endl;
-                //cout<<pointer->shapeScore<<endl;
-                //cout<<pointer->posScore<<endl;
-                pointer=pointer->next;
-            }
-            cout<<cal.word<<endl;
-            cout<<word1<<" "<<word2<<" "<<finalW<<endl;
-            ans=ans->next;
+            preState=nowState;
         }
-
+        
+        if(nowState==2) //waiting
+        {
+            preState=nowState;
+            return;
+        }
+        if(preState==1&&nowState==1)
+            return;
+        
+        if(getData()==-1)
+        {
+            cout<<"getData return\n";
+            preState=nowState;
+            return;
+        }
+        //Unit *ans=&inputData;
+        //memcpy(&cal,ans,sizeof(Unit));
+        cout<<"start computing"<<endl;
+        mempointer=0;
+        //memset(&wordList, 0, sizeof(Unit));
+        normalize(&cal);
+        if(templatePruning()==0)
+        {
+            preState=nowState;
+            return;
+        }
+        computeShape();
+        computeLocation();
+        Integration();
+        Unit *pointer=wordListNEW;
+        QuickSortList(wordListNEW,wordEnd);
+        outputNUM=0;
+        cout<<"\n\n";
+        
+        while(pointer->next!=NULL&&outputNUM<6)
+        {
+            cout<<"[Computing] word: "<<pointer->word<<endl;
+            cout<<"[Computing] score: "<<pointer->finalScore<<endl;
+            memset(output[outputNUM],0,50);
+            pointer->word.copy(output[outputNUM],pointer->word.size(),0);
+            pointer=pointer->next;
+            outputNUM++;
+        }
+        printf("[Computing State] preState %d nowState %d\n",preState,nowState);
+        if(preState!=1&&nowState==1)
+            this->ui->setwords(output, outputNUM, true);
+        else
+            this->ui->setwords(output, outputNUM, false);
+        preState=nowState;
         
     }
-
+    
 };
 
 #endif /* getWords_hpp */

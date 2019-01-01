@@ -18,6 +18,7 @@ public:
 	virtual void onDeviceChange(const Leap::Controller&);
 	virtual void onServiceConnect(const Leap::Controller&);
 	virtual void onServiceDisconnect(const Leap::Controller&);
+	int getState();
 	/**
 	 * 返回 nSamplePoints 个 路径上的Sample点
 	 * 函数要保证线程安全，不锁死的返回
