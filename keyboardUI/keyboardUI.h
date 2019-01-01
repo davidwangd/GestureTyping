@@ -6,6 +6,10 @@
 #include<vector>
 #include<string>
 #include<iostream>
+#include<pthread.h>
+
+#define MAX_WORD_NUM 5
+#define MAX_WORD_LEN 30
 
 class keyboard{
 private:
@@ -19,6 +23,8 @@ private:
     char** words;
     int wordnum;
     bool selectingWords;
+
+    pthread_mutex_t trajLock, gestureLock, wordsLock;
 
     cimg_library::CImg<unsigned char> img;
     cimg_library::CImg<unsigned char> visu;
@@ -52,6 +58,10 @@ private:
 
     int getnext(int i);
 
+    int drawMiddleResults();
+
+    int createButtons();
+
 public:
 
     keyboard(int trajectory_len = 50);
@@ -59,6 +69,10 @@ public:
     int setGesture(int gesture);
 
     int setPosXY(int x, int y);
+
+    int setwords(char **wordlist, int wordnum, bool isFinal);
+
+    pthread_mutex_t getWordsLock();
 };
 
 

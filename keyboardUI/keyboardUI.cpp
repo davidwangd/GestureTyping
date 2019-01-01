@@ -28,6 +28,9 @@ keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width + lrMargi
     head = tail = 0;
     gesture = 0;
     selectingWords = false;
+
+    words = new char*[MAX_WORD_NUM];
+    for (int i = 0; i < MAX_WORD_NUM; i++) words[i] = new char[MAX_WORD_LEN];
     initPos();
 }
 
@@ -53,6 +56,8 @@ int keyboard::highlight(int y0, int x0) {
     if (y0 == 0) x = x0 * 77 + 115;
     else if (y0 == 1) x = x0 * 77 + 154;
     else if (y0 == 2) x = x0 * 77 + 193;
+    else x = 0;
+    x += lrMargin;
     y = y0 * 62 + 63 + display_height;
     //printf("x0: %d y0: %d\n", x, y);
 
@@ -119,12 +124,14 @@ int keyboard::getName(int y, int x) {
 }
 
 int keyboard::setGesture(int gesture) {
+    pthread_mutex_lock(&gestureLock);
     if (gesture < 0 || gesture > 2) {
         printf("Error! Gesture number out of range.\n");
         return -1;
     }
     this->gesture = gesture;
     clear_trajectory();
+    pthread_mutex_unlock(&gestureLock);
     return 0;
 }
 
@@ -136,18 +143,24 @@ int keyboard::clear_trajectory() {
 int keyboard::setPosXY(int x, int y) {
     //printf("xy: %d %d\n", x, y);
     //if (tail == trajectory_point_num - 1 || tail + 1 == head) head = (head + 1) % trajectory_point_num;
+    pthread_mutex_lock(&gestureLock);
     if (!bounded(x, y)) {
         printf("Error! Position index out of range.\n");
         return -1;
     }
 
     if (getnext(tail) == head) head = getnext(head);
+
+    pthread_mutex_lock(&trajLock);
     px[tail] = x + lrMargin; py[tail] = y + display_height;
     pt[tail] = curTime = clock();
+    pthread_mutex_unlock(&trajLock);
     //printf("time: %d\n", pt[tail]);    ///consider adding time flags here?
     tail = getnext(tail);
 
     draw(x, y);
+
+    pthread_mutex_unlock(&gestureLock);
 
     return 0;
 }
@@ -218,4 +231,31 @@ int keyboard::displayKey(const char *str) {
 int keyboard::displayState(const char *str) {
     visu.draw_text(730, 335 + display_height, str, black, white, 1, 24);
 	return 0;
+}
+
+int keyboard::setwords(char **wordlist, int wordnum, bool isFinal) {
+    pthread_mutex_lock(&wordsLock);
+
+    ///
+    pthread_mutex_unlock(&wordsLock);
+    selectingWords = isFinal;
+    this->wordnum = wordnum;
+    if (isFinal) {
+        createButtons();
+    }
+    else {
+        drawMiddleResults();
+    }
+}
+
+int keyboard::drawMiddleResults() {
+    printf("Drawing middle results!\n");
+}
+
+int keyboard::createButtons() {
+    printf("Creating Buttons!\n");
+}
+
+pthread_mutex_t keyboard::getWordsLock() {
+    return wordsLock;
 }
