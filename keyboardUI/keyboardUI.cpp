@@ -139,11 +139,13 @@ int keyboard::setGesture(int gesture) {
     this->gesture = gesture;
     clear_trajectory();
     if (gesture == 2) {
-        int x0 = px[tail], y0 = py[tail];
-        for (int i = 0; i < wordnum; i++) {
-            if (labs(x0 - buttons[i].x) <= buttons[i].w && labs(y0 - buttons[i].y) <= buttons[i].h) {
-                sendword(buttons[i].wd);
-                break;
+        if (selectingWords) {
+            int x0 = px[tail], y0 = py[tail];
+            for (int i = 0; i < wordnum; i++) {
+                if (labs(x0 - buttons[i].x) <= buttons[i].w && labs(y0 - buttons[i].y) <= buttons[i].h) {
+                    sendword(buttons[i].wd);
+                    break;
+                }
             }
         }
         selectingWords = false;
