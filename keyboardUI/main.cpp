@@ -5,9 +5,9 @@ using namespace cimg_library;
 CImg<unsigned char> image("keyboard.bmp");
 keyboard board;
 
-char *wordlist[5] = {"111", "222", "333", "444", "555"};
+char *wordlist[5] = {"1", "22", "333", "4444", "55555"};
 
-char *wordlist2[4] = {"666", "777", "888", "999"};
+char *wordlist2[4] = {"666", "777777777777", "888888888", "9999"};
 
 int main() {
     CImgDisplay main_disp(image, "Click a point");
@@ -19,15 +19,13 @@ int main() {
             cnt++;
             int x = main_disp.mouse_x(), y = main_disp.mouse_y();
             board.setPosXY(x, y);
-            if (x > 1000) {
-                gesture = y / 100;
-                if (gesture < 3) board.setGesture(gesture);
-            }
-            if (cnt == 200) {
+            if (cnt == 100) board.setGesture(1);
+            else if (cnt == 200) {
                 board.setwords(wordlist, 5, true);
             }
+            else if (cnt == 300) board.setGesture(2);
             else if (cnt == 400) {
-                board.setwords(wordlist2, 4, false);
+                board.setwords(wordlist2, 4, true);
                 cnt = 0;
             }
         }
