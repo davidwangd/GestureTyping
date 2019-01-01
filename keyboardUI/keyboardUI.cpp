@@ -262,9 +262,9 @@ int keyboard::setwords(char **wordlist, int wordnum, bool isFinal) {
     if (wordnum < 0) wordnum = 0;
 
     for (int i = 0; i < wordnum; i++) strcpy(words[i], wordlist[i]);
-    this->wordnum = wordnum;
     if (isFinal) {
         selectingWords = true;
+        this->wordnum = wordnum;
         createButtons();
     }
     else {
