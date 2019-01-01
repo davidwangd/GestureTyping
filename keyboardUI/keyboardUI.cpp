@@ -140,8 +140,11 @@ int keyboard::setGesture(int gesture) {
     clear_trajectory();
     if (gesture == 2) {
         if (selectingWords) {
+            printf("Selecting words!\n");
             int x0 = px[tail], y0 = py[tail];
+            printf("%d %d\n", x0, y0);
             for (int i = 0; i < wordnum; i++) {
+                printf("%d %d %d %d\n", buttons[i].x, buttons[i].y, buttons[i].w, buttons[i].h);
                 if (labs(x0 - buttons[i].x) <= buttons[i].w && labs(y0 - buttons[i].y) <= buttons[i].h) {
                     sendword(buttons[i].wd);
                     break;
@@ -215,7 +218,7 @@ int keyboard::drawMouse(int x, int y, int gesture) {
                 color[0] = mouse(i, j, 0, 0);
                 color[1] = mouse(i, j, 0, 1);
                 color[2] = mouse(i, j, 0, 2);
-                visu.draw_point(i + x - 20, j + y - 25, 0, color);
+                visu.draw_point(i + x - 15, j + y - 3, 0, color);
             }
     }
 	return 0;
