@@ -186,7 +186,8 @@ int keyboard::draw(int x, int y) {
 int keyboard::drawMouse(int x, int y, int gesture) {
     y += display_height;
     x += lrMargin;
-    if (gesture != 1) visu.draw_circle(x, y, rad[gesture], blue);
+    if (gesture == 0) visu.draw_circle(x, y, rad[gesture], red);
+    else if (gesture == 1) visu.draw_circle(x, y, rad[gesture], blue);
     else {
         //visu.draw_image(x-20, y-25, 0, 0, mouse);
         unsigned char color[3];
@@ -210,11 +211,11 @@ int keyboard::draw_trajectory() {
                 head = getnext(head);
                 continue;
             }
-            visu.draw_line(px[i], py[i], px[j], py[j], blue);
-            visu.draw_line(px[i]+1, py[i], px[j]+1, py[j], blue);
-            visu.draw_line(px[i]-1, py[i], px[j]-1, py[j], blue);
-            visu.draw_line(px[i], py[i]+1, px[j], py[j]+1, blue);
-            visu.draw_line(px[i], py[i]-1, px[j], py[j]-1, blue);
+            visu.draw_line(px[i], py[i], px[j], py[j], red);
+            visu.draw_line(px[i]+1, py[i], px[j]+1, py[j], red);
+            visu.draw_line(px[i]-1, py[i], px[j]-1, py[j], red);
+            visu.draw_line(px[i], py[i]+1, px[j], py[j]+1, red);
+            visu.draw_line(px[i], py[i]-1, px[j], py[j]-1, red);
         }
     }
 	return 0;
