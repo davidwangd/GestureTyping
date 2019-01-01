@@ -187,7 +187,7 @@ int keyboard::drawMouse(int x, int y, int gesture) {
     y += display_height;
     x += lrMargin;
     if (gesture == 0) visu.draw_circle(x, y, rad[gesture], red);
-    else if (gesture == 1) visu.draw_circle(x, y, rad[gesture], blue);
+    else if (gesture == 2) visu.draw_circle(x, y, rad[gesture], blue);
     else {
         //visu.draw_image(x-20, y-25, 0, 0, mouse);
         unsigned char color[3];
