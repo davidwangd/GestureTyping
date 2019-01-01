@@ -8,6 +8,8 @@
 #include<iostream>
 #include<pthread.h>
 
+#include "TextDisplay.h"
+
 #define MAX_WORD_NUM 5
 #define MAX_WORD_LEN 30
 
@@ -34,6 +36,8 @@ private:
     char** words;
     int wordnum;
     bool selectingWords;
+
+    TextDisplay output;
 
     Button buttons[MAX_WORD_NUM];
 

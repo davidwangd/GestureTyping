@@ -337,4 +337,5 @@ void keyboard::getButton(int x, int y) {
 
 void keyboard::sendword(char *word) {
     printf("[word]: %s\n", word);
+    output.setText(word);
 }
