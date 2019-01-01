@@ -8,6 +8,9 @@
 
 #include <iostream>
 #include <cstring>
+#include <pthread.h>
+
+#include "getWords.hpp"
 #include "Leap.h"
 #include "Listener.h"
 using namespace Leap;
@@ -214,10 +217,22 @@ void SampleListener::onServiceDisconnect(const Controller& controller) {
   std::cout << "Service Disconnected" << std::endl;
 }
 
+MyListener listener;
+
+void* AlgorithmThread(void *args) {
+	Algorithm *algo = new Algorithm(&listener, listener.getUI());
+	while (true) {
+		algo->startCompute();
+	}
+}
+
 int main(int argc, char** argv) {
   // Create a sample listener and controller
-  MyListener listener;
   Controller controller;
+
+  pthread_t  t;
+ // t=AlgorithmThread;
+  pthread_create(&t, NULL, &AlgorithmThread, NULL);
 
   controller.addListener(listener);
   controller.setPolicy(Leap::Controller::POLICY_BACKGROUND_FRAMES);

@@ -1,6 +1,7 @@
 #include "Listener.h"
 #include <iostream>
 #include <cstring>
+#include <fstream>
 using namespace std;
 using namespace Leap;
 
@@ -53,11 +54,12 @@ void MyListener::processRightHand(const Hand& hand) {
 		typeMode = Selecting;
 	}
 	if (typeMode == Selecting && 
-			bones[RightHandIndex][Thumb][4].distanceTo(bones[RightHandIndex][IndexFinger][4]) < length / 2) {
+			bones[RightHandIndex][Thumb][4].distanceTo(bones[RightHandIndex][IndexFinger][4]) < length / 4 &&
+			bones[RightHandIndex][Thumb][4].distanceTo(bones[RightHandIndex][MiddleFinger][4]) < length / 2) {
 		typeMode = Waiting;
 	}
 	if (typeMode == Waiting && 
-			bones[RightHandIndex][Thumb][4].distanceTo(bones[RightHandIndex][IndexFinger][4]) > length * 0.65) {
+			bones[RightHandIndex][Thumb][4].distanceTo(bones[RightHandIndex][IndexFinger][4]) > length * 0.45) {
 		typeMode = Typing;
 	}
 }
@@ -108,6 +110,10 @@ void MyListener::onFrame(const Controller& controller) {
 			this->unlock();
 		}
 	}
+	// Log The PathData
+	if (this->typeMode == Selecting && this->preMode == Typing) {
+		dump();
+	}
 }
 
 void MyListener::lock() {
@@ -117,13 +123,22 @@ void MyListener::unlock() {
 	this->locker.unlock();
 }
 
+void MyListener::dump() {
+	ofstream fout("log.txt");
+	auto list = this->getSamplePoints();
+	printf("%d\n", list.size());
+	for (Point x : list) {
+		fout << x.x << " " << x.y << endl;
+	}
+}
+
 vector<Point> MyListener::getSamplePoints(int nSamplePoints) {
 	this->lock();
 	vector<Point> cur = this->points;
 	this->unlock();
 	// 样本过于少不能进行处理
 	if (cur.size() <= nSamplePoints) return cur;
-
+	vector<Point> ret;
 	// 去除距离不正常过的噪声点
 	for (int i = 0;i + 2 < cur.size() && cur.size() > nSamplePoints; i++) {
 		double d1 = cur[i].distanceToSqr(cur[i + 1]);
@@ -142,24 +157,29 @@ vector<Point> MyListener::getSamplePoints(int nSamplePoints) {
 		dis[i] = dis[i - 1] + cur[i].distanceTo(cur[i + 1]);
 	}
 	double slicelen = dis[cur.size() - 1] / (nSamplePoints + 1);
+
+	printf("GetSamples(%d) => %lf\n", nSamplePoints, slicelen);
+
 	double now = 0;
 
-	for (int i = 0;i + 1 < cur.size();i++) {
+	for (int i = 0;i + 1 < cur.size();) {
 		// 将在cur[i]与cur[i+1]中
 		// 采用线性插值的方法计算中点
 		if (dis[i] <= now && dis[i + 1] >= now) {
 			// 在一定范围内不值得插值
 			if (dis[i + 1] - dis[i] < 1e-3) {
-				cur.push_back((cur[i] + cur[i + 1])*0.5);
+				ret.push_back((cur[i] + cur[i + 1])*0.5);
 			} else {
 				double f = (now - dis[i]) / (dis[i + 1] - dis[i]);
-				cur.push_back(cur[i] * f + cur[i + 1] * (1 - f));
+				ret.push_back(cur[i] * f + cur[i + 1] * (1 - f));
 			}
+			if (ret.size() == nSamplePoints - 1) break;
 			now += slicelen;
 		}
+		if (dis[i + 1] <= now) i++;
 	}
-	cur.push_back(cur[cur.size() - 1]);
-	return cur;
+	ret.push_back(cur[cur.size() - 1]);
+	return ret;
 }
 
 void MyListener::processBones(const Hand &hand, int t) {

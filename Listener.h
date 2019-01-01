@@ -1,10 +1,10 @@
 #ifndef LISTENER_H
 #define LISTENER_H
-#include <Leap.h>
+#include "Leap.h"
 #include <vector>
 #include <mutex>
 #include "Point.h"
-#include "keyboardUI/keyboardUI.h"
+#include "keyboardUI.h"
 
 class MyListener : public Leap::Listener {
 public:
@@ -26,6 +26,9 @@ public:
 	 *  要保证运行效率==
 	 */
 	std::vector<Point> getSamplePoints(int nSamplePoints = 50) ;
+	keyboard* getUI(){
+		return &this->board;
+	}
 private:
 	void processLeftHand(const Leap::Hand& hand);
 	void processRightHand(const Leap::Hand& hand);
@@ -51,6 +54,7 @@ private:
 	 * 返回一个 0 ~ 1 之间的实数表示手指弯曲程度， 0为完全伸直， 1 为完全折叠弯曲
 	 */
 	double checkFingerAngle(int HandIndex, int FingerIndex) const;
+	void dump();
 };
 
 #endif
