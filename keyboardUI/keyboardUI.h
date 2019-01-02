@@ -87,7 +87,7 @@ private:
 
 public:
 
-    keyboard(int trajectory_len = 400);
+    keyboard(int trajectory_len = 20);
 
     int setGesture(int gesture);
 

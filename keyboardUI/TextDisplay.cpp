@@ -10,6 +10,8 @@ TextDisplay::TextDisplay():visu(width, height, 1, 3, 0), background("bg.bmp"), d
     visu.draw_image(0, 0, 0, 0, background).display(disp);
     pghdr = new Page();
     curPage = pghdr;
+    f = fopen("result.txt", "w");
+    fclose(f);
 }
 
 void TextDisplay::setText(const char *text) {
