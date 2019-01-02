@@ -28,6 +28,8 @@ public:
 
     void setText(const char *text);
 
+    void delText();
+
     FILE *f;
 };
 #endif // TEXT_DISPLAY
