@@ -97,7 +97,7 @@ void MyListener::onFrame(const Controller& controller) {
 
 	if (preMode != typeMode) {
 		cout << "[preMode != typeMode]"<<ListenerMode[this->typeMode] << endl;
-		if(this->typeMode>=1)
+		//if(this->typeMode>=1)
 			board.setGesture(this->typeMode - 1);
 	}
 	if (this->typeMode == Typing && this->preMode == Waiting) {
@@ -146,7 +146,7 @@ vector<Point> MyListener::getSamplePoints(int nSamplePoints) {
 	this->unlock();
 
 	// 样本过于少不能进行处理
-	if (cur.size() <= nSamplePoints) 
+	if (cur.size() <= nSamplePoints / 5) 
 	{
 		//printf("[getSamplePoints] cur.size() %d\n",cur.size());
 		return cur;
@@ -162,7 +162,7 @@ vector<Point> MyListener::getSamplePoints(int nSamplePoints) {
 			cur.erase(cur.begin() + i + 1);
 		}
 	}
-	if (cur.size() <= nSamplePoints) return cur;
+	if (cur.size() <= nSamplePoints / 5) return cur;
 
 	// 按照距离进行切片处理
 	vector<double> dis = vector<double>(cur.size(), 0);
