@@ -101,6 +101,8 @@ private:
 
     void pressKey(int x, int y);
 
+    void delword();
+
 public:
 
     keyboard(int trajectory_len = 20);
