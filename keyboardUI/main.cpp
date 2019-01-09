@@ -7,7 +7,7 @@ keyboard board;
 
 char *wordlist[5] = {"1", "22", "333", "4444", "55555"};
 
-char *wordlist2[5] = {"666", "777777777777", "888888888", "9999", "000000000100000000020000000003"};
+char *wordlist2[5] = {"hello", "world", "888888888", "9999", "000000000100000000020000000003"};
 
 int main() {
     CImgDisplay main_disp(image, "Click a point");

@@ -12,6 +12,13 @@ const unsigned char red[] = { 255, 0, 0 }, green[] = { 0, 255, 0 }, blue[] = { 0
 const unsigned char black[] = {0, 0, 0}, white[] = {255, 255, 255}, bgc[] = {51, 51, 51};
 
 const char letters[3][11] = {"qwertyuiop", "asdfghjkl","zxcvbnm"};
+
+const char keyname[5][15][10] = {{"Esc", "`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "Backspace"},
+                        {"Tab", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\", "Del"},
+                        {"CapsLock", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "Enter"},
+                        {"Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "Up", "Shift"},
+                        {"Fn", "Ctrl", "Win", "Alt", "Space", "Alt", "Ctrl", "Left", "Down", "Right", "??????"}};
+
 const int len[3] = {10, 9, 7};
 const int rad[3] = {10, 20, 10};
 
@@ -29,9 +36,15 @@ keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width + lrMargi
     gesture = 0;
     selectingWords = false;
 
+    //mode = NormalWord;
+    mode = SingleKey;
+    printf("%d\n", mode);
+
     words = new char*[MAX_WORD_NUM];
     for (int i = 0; i < MAX_WORD_NUM; i++) words[i] = new char[MAX_WORD_LEN];
-    initPos();
+
+    isShift = isCapsLock = false;
+    //initPos();
 }
 
 keyboard::~keyboard() {
@@ -40,7 +53,7 @@ keyboard::~keyboard() {
     delete words;
 }
 
-void keyboard::initPos() {
+/*void keyboard::initPos() {
     for (char ch = 'a'; ch <= 'z'; ch++) {
         bool flag = false;
         for (int i = 0; i < 3; i++) {
@@ -50,7 +63,7 @@ void keyboard::initPos() {
             if (flag) break;
         }
     }
-}
+}*/
 
 bool keyboard::bounded(int x, int y) {
     return ((x >= 0 && x < width) && (y >= 0 && y < height));
@@ -143,7 +156,7 @@ int keyboard::setGesture(int gesture) {
     this->gesture = gesture;
     clear_trajectory();
     if (gesture == 2) {
-        if (selectingWords) {
+        if (mode == NormalWord && selectingWords) {
             printf("Selecting words!\n");
             int thatTime = head;
             int x0 = px[thatTime], y0 = py[thatTime];
@@ -155,6 +168,12 @@ int keyboard::setGesture(int gesture) {
                     break;
                 }
             }
+        }
+        else if (mode == SingleKey) {
+            int thatTime = head;
+            int x0 = px[thatTime] - lrMargin, y0 = py[thatTime] - display_height;
+            getKeyPos(x0, y0);
+            pressKey(x0, y0);
         }
         selectingWords = false;
     }
@@ -196,17 +215,115 @@ int keyboard::draw(int x, int y) {
     if (gesture == 0) displayState("Current mode is: Typing");
     else if (gesture == 1) displayState("Current mode is: Selecting");
     else if (gesture == 2) displayState("Current mode is: Waiting");
-    if (selectingWords) {
-        for (int i = 0; i < wordnum; i++) paint(buttons[i]);
-        getButton(x, y);
+    if (mode == NormalWord) {
+        if (selectingWords) {
+            for (int i = 0; i < wordnum; i++) paint(buttons[i]);
+            getButton(x, y);
+        }
+        else getPos(x, y);
     }
-    else getPos(x, y);
+    else if (mode == SingleKey) {
+        getKey(x, y);
+    }
     drawMouse(x, y, gesture);
     //visu.draw_circle(x, y, rad[gesture], blue);
     if (gesture == 0) draw_trajectory();
 
     visu.display(disp);
 	return 0;
+}
+
+void keyboard::getKeyPos(int &x, int &y) {
+    if (y < 63) y = 0;
+    else y = (y - 1) / 62;
+    if (y > 4) y = 4;
+    ///0 - 4
+
+    switch (y) {
+    case 0:
+        x = x / 77;
+        if (x >= 15) x = 14;
+        ///0 - 14
+        break;
+    case 1:
+        if (x < 115) x = 0;
+        else x = (x - 38) / 77;
+        if (x >= 15) x = 14;
+        ///0 - 14
+        break;
+    case 2:
+        if (x < 154) x = 0;
+        else x = (x - 77) / 77;
+        if (x >= 12) x = 12;
+        ///0 - 12
+        break;
+    case 3:
+        if (x < 193) x = 0;
+        else x = (x - 116) / 77;
+        if (x >= 12) x = 12;
+        ///0 - 12
+        break;
+    case 4:
+        if (x < 308) x = x / 77;            ///0 - 3
+        else if (x >= 732) x = (x - 347) / 77;
+        else x = 4;
+
+        if (x >= 10) x = 10;
+
+        ///0 - 10
+        break;
+    default:
+        printf("Error!\n"); break;
+    }
+}
+
+void keyboard::getKey(int x, int y) {
+    getKeyPos(x, y);
+    hoverKey(x, y);
+}
+
+void keyboard::highlightKey(int x, int y) {        ///all written of magic numbers
+    switch (y) {
+    case 0:
+        if (x != 14) antiColor(x * 77 + lrMargin, 0 + display_height, (x + 1) * 77 + lrMargin - 1, 62 + display_height);
+        else antiColor(14 * 77 + lrMargin, 0 + display_height, width + lrMargin, 62 + display_height);
+        break;
+    case 1:
+        if (x == 14) antiColor(14 * 77 + 38 + lrMargin, 63 + display_height, width + lrMargin, 124 + display_height);
+        else if (x == 0) antiColor(lrMargin, 63 + display_height, 114 + lrMargin, 124 + display_height);
+        else antiColor(lrMargin + x * 77 + 38, 63 + display_height, lrMargin + (x + 1) * 77 + 37, 124 + display_height);
+        break;
+    case 2:
+        if (x == 12) antiColor(12 * 77 + 77 + lrMargin, 125 + display_height, width + lrMargin, 186 + display_height);
+        else if (x == 0) antiColor(lrMargin, 125 + display_height, 153 + lrMargin, 186 + display_height);
+        else antiColor(lrMargin + x * 77 + 77, 125 + display_height, lrMargin + (x + 1) * 77 + 76, 186 + display_height);
+        break;
+    case 3:
+        if (x == 12) antiColor(12 * 77 + 116 + lrMargin, 187 + display_height, width + lrMargin, 248 + display_height);
+        else if (x == 0) antiColor(lrMargin, 187 + display_height, 192 + lrMargin, 248 + display_height);
+        else antiColor(lrMargin + x * 77 + 116, 187 + display_height, lrMargin + (x + 1) * 77 + 115, 248 + display_height);
+        break;
+    case 4:
+        if (x == 10) antiColor(10 * 77 + 347 + lrMargin, 249 + display_height, width + lrMargin, 310 + display_height);
+        else if (x == 4) antiColor(308 + lrMargin, 249 + display_height, 731 + lrMargin, 310 + display_height);
+        else if (x < 4) antiColor(lrMargin + x * 77, 249 + display_height, lrMargin + (x + 1) * 77 - 1, 310 + display_height);
+        else antiColor(lrMargin + x * 77 + 347, 249 + display_height, lrMargin + (x + 1) * 77 + 346, 310 + display_height);
+        break;
+    default:
+        printf("Error!\n");
+        break;
+    }
+}
+
+void keyboard::hoverKey(int x, int y) {
+    //printf(keyname[y][x]);
+    char displayStr[30] = "Current Key is: ";
+    displayKey(strcat(displayStr, keyname[y][x]));
+    highlightKey(x, y);
+}
+
+void keyboard::pressKey(int x, int y) {
+    printf("Keypressed: %s\n", keyname[y][x]);
 }
 
 int keyboard::drawMouse(int x, int y, int gesture) {

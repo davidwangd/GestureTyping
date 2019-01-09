@@ -33,9 +33,15 @@ private:
     clock_t curTime;
     int posx[400], posy[400];
 
+    enum inputMode{
+        NormalWord, SingleKey
+    }mode;
+
     char** words;
     int wordnum;
     bool selectingWords;
+
+    bool isShift, isCapsLock;
 
     TextDisplay output;
 
@@ -49,7 +55,7 @@ private:
     cimg_library::CImg<unsigned char> mouseMask;
     cimg_library::CImgDisplay disp;
 
-    void initPos();
+    //void initPos();
 
     bool bounded(int x, int y);
 
@@ -84,6 +90,16 @@ private:
     void getButton(int x, int y);
 
     void sendword(char *word);
+
+    void getKeyPos(int &x, int &y);
+
+    void getKey(int x, int y);
+
+    void hoverKey(int x, int y);
+
+    void highlightKey(int x, int y);
+
+    void pressKey(int x, int y);
 
 public:
 
