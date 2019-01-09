@@ -89,7 +89,7 @@ private:
 
     void getButton(int x, int y);
 
-    void sendword(char *word);
+    void sendword(const char *word);
 
     void getKeyPos(int &x, int &y);
 
