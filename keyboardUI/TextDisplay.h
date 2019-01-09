@@ -20,7 +20,7 @@ public:
     cimg_library::CImg<unsigned char> background;
     cimg_library::CImgDisplay disp;
 
-    Page *pghdr, *curPage;
+    Page *pghdr, *curPage, *lastPage;
 
     TextDisplay();
 
@@ -29,6 +29,16 @@ public:
     void setText(const char *text);
 
     void delText();
+
+    void setLetter(char ch);
+
+    void delLetter();
+
+    void display();
+
+    void pageUp();
+
+    void pageDown();
 
     FILE *f;
 };

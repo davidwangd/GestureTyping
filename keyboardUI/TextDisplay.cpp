@@ -9,13 +9,14 @@ const unsigned char black[] = {0, 0, 0}, white[] = {255, 255, 255};
 TextDisplay::TextDisplay():visu(width, height, 1, 3, 0), background("bg.bmp"), disp(background, "TextOutput") {
     visu.draw_image(0, 0, 0, 0, background).display(disp);
     pghdr = new Page();
-    curPage = pghdr;
+    lastPage = curPage = pghdr;
     f = fopen("result.txt", "w");
     fclose(f);
 }
 
 void TextDisplay::setText(const char *text) {
     //printf("Trying to show: %s\n", text);
+    if (lastPage != curPage) return;
 
     f = fopen("result.txt", "a");
     fprintf(f, text);
@@ -39,6 +40,7 @@ void TextDisplay::setText(const char *text) {
             curPage->next = new Page();
             curPage->next->last = curPage;
             curPage = curPage->next;
+            lastPage = curPage;
         }
         else {
             curPage->lines++;
@@ -48,13 +50,21 @@ void TextDisplay::setText(const char *text) {
         strcat(curPage->cur, text);
         strcat(curPage->cur, " ");
     }        ///cannot place in this line
-    visu.draw_image(0, 0, 0, 0, background);
-    for (int i = 0; i <= curPage->lines; i++)
-        visu.draw_text(10, 10 + i * (curPage->lineh), curPage->content[i], black, 0, 1, 20).display(disp);
+
+    display();
 
 }
 
+void TextDisplay::display() {
+    visu.draw_image(0, 0, 0, 0, background);
+    for (int i = 0; i <= curPage->lines; i++)
+        visu.draw_text(10, 10 + i * (curPage->lineh), curPage->content[i], black, 0, 1, 20);
+
+    visu.display(disp);
+}
+
 void TextDisplay::delText() {
+    if (lastPage != curPage) return;
     int len = strlen(curPage->cur);
     if (len == 0) {
         if (curPage->lines > 0) {
@@ -65,6 +75,7 @@ void TextDisplay::delText() {
         else {
             if (curPage->last == NULL) return;
             curPage = curPage->last;
+            lastPage = curPage;
             delete curPage->next;
             len = strlen(curPage->cur);
         }
@@ -72,11 +83,10 @@ void TextDisplay::delText() {
 
     len -= 2;
     while (len > 0 && curPage->cur[len] != ' ') len--;
-    curPage->cur[len] = '\0';
+    if (len) curPage->cur[len+1] = '\0';
+    else curPage->cur[0] = '\0';
 
-    visu.draw_image(0, 0, 0, 0, background);
-    for (int i = 0; i <= curPage->lines; i++)
-        visu.draw_text(10, 10 + i * (curPage->lineh), curPage->content[i], black, 0, 1, 20).display(disp);
+    display();
 }
 
 TextDisplay::~TextDisplay() {
@@ -84,6 +94,20 @@ TextDisplay::~TextDisplay() {
         Page *nxt = pghdr->next;
         delete pghdr;
         pghdr = nxt;
+    }
+}
+
+void TextDisplay::pageUp() {
+    if (curPage->last != NULL) {
+        curPage = curPage->last;
+        display();
+    }
+}
+
+void TextDisplay::pageDown() {
+    if (curPage != lastPage) {
+        curPage = curPage->next;
+        display();
     }
 }
 
