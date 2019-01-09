@@ -36,8 +36,8 @@ keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width + lrMargi
     gesture = 0;
     selectingWords = false;
 
-    //mode = NormalWord;
-    mode = SingleKey;
+    mode = NormalWord;
+    //mode = SingleKey;
     printf("%d\n", mode);
 
     words = new char*[MAX_WORD_NUM];
@@ -100,9 +100,9 @@ int keyboard::antiColor(int x0, int y0, int x1, int y1) {
 int keyboard::getPos(int x, int y) {
     int yIndex = (y - 63) / 62, xIndex;
     if (y < 63 || y >= 249) {
-        /*if (y >= 63 || x < 1077) return -1;
-        yIndex = -1; xIndex = 0;*/
-        return -1;
+        if (y >= 63 || x < 1077) return -1;
+        yIndex = -1; xIndex = 0;
+        //return -1;
     }
     else {
         switch (yIndex) {
@@ -137,7 +137,7 @@ int keyboard::getName(int y, int x) {
     else {
         //puts("Backspace");
         displayKey("Current key is: Backspace");
-        //antiColor(1077, 0, 1200, 62);
+        antiColor(1077 + lrMargin, 0 + display_height, 1200 + lrMargin, 62 + display_height);
     }
 	return 0;
 }
@@ -174,6 +174,12 @@ int keyboard::setGesture(int gesture) {
                 }
             }
             selectingWords = false;
+        }
+        else if (mode == NormalWord && !selectingWords) {
+            int thatTime = head;
+            int x0 = px[thatTime] - lrMargin, y0 = py[thatTime] - display_height;
+            printf("%d %d\n", x0, y0);
+            if ((x0 < 63) && (y0 >= 1077)) delword();
         }
         else if (mode == SingleKey && lastGesture != -1) {
             int thatTime = head;
@@ -331,8 +337,10 @@ void keyboard::hoverKey(int x, int y) {
 
 void keyboard::pressKey(int x, int y) {
     printf("Keypressed: %s\n", keyname[y][x]);
-    if (x < 14) sendword(keyname[y][x]);
-    else delword();
+    if (x == 14) delword();
+    else if (x == 11 && y == 3) output.pageUp();             ///Up
+    else if (x == 9 && y == 4) output.pageDown();            ///Down
+    else sendword(keyname[y][x]);
 
 }
 
