@@ -147,14 +147,19 @@ int keyboard::setGesture(int gesture) {
     pthread_mutex_lock(&trajLock);
     if (gesture < 0) {
         selectingWords = false;
+        lastGesture = -1;
         return 0;
     }
     if (gesture > 2) {
         printf("Error! Gesture number out of range.\n");
         return -1;
     }
-    this->gesture = gesture;
+
     clear_trajectory();
+
+    lastGesture = this->gesture;
+    this->gesture = gesture;
+
     if (gesture == 2) {
         if (mode == NormalWord && selectingWords) {
             printf("Selecting words!\n");
@@ -168,15 +173,17 @@ int keyboard::setGesture(int gesture) {
                     break;
                 }
             }
+            selectingWords = false;
         }
-        else if (mode == SingleKey) {
+        else if (mode == SingleKey && lastGesture != -1) {
             int thatTime = head;
             int x0 = px[thatTime] - lrMargin, y0 = py[thatTime] - display_height;
+            printf("%d %d\n", x0, y0);
             getKeyPos(x0, y0);
             pressKey(x0, y0);
         }
-        selectingWords = false;
     }
+
     pthread_mutex_unlock(&trajLock);
     pthread_mutex_unlock(&gestureLock);
     return 0;

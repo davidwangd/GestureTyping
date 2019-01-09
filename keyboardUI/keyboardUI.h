@@ -27,7 +27,7 @@ public:
 class keyboard{
 private:
     int trajectory_point_num, head, tail;
-    int gesture;
+    int gesture, lastGesture;
     int px[405], py[405];
     clock_t pt[405];
     clock_t curTime;
