@@ -36,6 +36,9 @@ int Algorithm::loadData()
         pointer[charFlag]->maxH=0;
         pointer[charFlag]->minW=400;
         pointer[charFlag]->maxW=0;
+        pointer[charFlag]->word[pointer[charFlag]->word.size()-1]='\0';
+        cout<<pointer[charFlag]->word<<endl;
+        cout<<pointer[charFlag]->word.size()<<endl;
         for(int i=0;i<50;i++)
         {
             if(!getline(myfile,temp,' '))
