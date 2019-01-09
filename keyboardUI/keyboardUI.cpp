@@ -5,7 +5,7 @@ using namespace cimg_library;
 
 const int height = 320, width = 1201;
 
-const int limit = 100000;
+const int limit = 1000000000;
 
 const unsigned char red[] = { 255, 0, 0 }, green[] = { 0, 255, 0 }, blue[] = { 0, 0, 255 };
 

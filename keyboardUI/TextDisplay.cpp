@@ -10,6 +10,8 @@ TextDisplay::TextDisplay():visu(width, height, 1, 3, 0), background("bg.bmp"), d
     visu.draw_image(0, 0, 0, 0, background).display(disp);
     pghdr = new Page();
     curPage = pghdr;
+    f = fopen("result.txt", "w");
+    fclose(f);
 }
 
 void TextDisplay::setText(const char *text) {
@@ -50,6 +52,31 @@ void TextDisplay::setText(const char *text) {
     for (int i = 0; i <= curPage->lines; i++)
         visu.draw_text(10, 10 + i * (curPage->lineh), curPage->content[i], black, 0, 1, 20).display(disp);
 
+}
+
+void TextDisplay::delText() {
+    int len = strlen(curPage->cur);
+    if (len == 0) {
+        if (curPage->lines > 0) {
+            curPage->lines--;
+            curPage->cur = curPage->content[curPage->lines];
+            len = strlen(curPage->cur);
+        }
+        else {
+            if (curPage->last == NULL) return;
+            curPage = curPage->last;
+            delete curPage->next;
+            len = strlen(curPage->cur);
+        }
+    }
+
+    len -= 2;
+    while (len > 0 && curPage->cur[len] != ' ') len--;
+    curPage->cur[len] = '\0';
+
+    visu.draw_image(0, 0, 0, 0, background);
+    for (int i = 0; i <= curPage->lines; i++)
+        visu.draw_text(10, 10 + i * (curPage->lineh), curPage->content[i], black, 0, 1, 20).display(disp);
 }
 
 TextDisplay::~TextDisplay() {
