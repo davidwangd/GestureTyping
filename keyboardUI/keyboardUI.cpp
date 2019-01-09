@@ -324,7 +324,7 @@ void keyboard::hoverKey(int x, int y) {
 
 void keyboard::pressKey(int x, int y) {
     printf("Keypressed: %s\n", keyname[y][x]);
-    sendword(keyname[y][x]]);
+    sendword(keyname[y][x]);
 
 }
 
