@@ -27,15 +27,21 @@ public:
 class keyboard{
 private:
     int trajectory_point_num, head, tail;
-    int gesture;
-    int px[205], py[205];
-    clock_t pt[205];
+    int gesture, lastGesture;
+    int px[405], py[405];
+    clock_t pt[405];
     clock_t curTime;
-    int posx[200], posy[200];
+    int posx[400], posy[400];
+
+    enum inputMode{
+        NormalWord, SingleKey
+    }mode;
 
     char** words;
     int wordnum;
     bool selectingWords;
+
+    bool isShift, isCapsLock;
 
     TextDisplay output;
 
@@ -49,7 +55,7 @@ private:
     cimg_library::CImg<unsigned char> mouseMask;
     cimg_library::CImgDisplay disp;
 
-    void initPos();
+    //void initPos();
 
     bool bounded(int x, int y);
 
@@ -83,11 +89,23 @@ private:
 
     void getButton(int x, int y);
 
-    void sendword(char *word);
+    void sendword(const char *word);
+
+    void getKeyPos(int &x, int &y);
+
+    void getKey(int x, int y);
+
+    void hoverKey(int x, int y);
+
+    void highlightKey(int x, int y);
+
+    void pressKey(int x, int y);
+
+    void delword();
 
 public:
 
-    keyboard(int trajectory_len = 50);
+    keyboard(int trajectory_len = 10);
 
     int setGesture(int gesture);
 
