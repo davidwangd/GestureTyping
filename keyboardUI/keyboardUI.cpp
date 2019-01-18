@@ -157,6 +157,7 @@ int keyboard::getName(int y, int x) {
 }
 
 int keyboard::setGesture(int gesture) {
+
 #ifdef _WIN32
 	gestureLock.lock();
 	trajLock.lock();
@@ -164,6 +165,7 @@ int keyboard::setGesture(int gesture) {
 	pthread_mutex_lock(&gestureLock);
 	pthread_mutex_lock(&trajLock);
 #endif
+
     if (gesture < 0) {
         selectingWords = false;
         lastGesture = -1;
@@ -248,7 +250,7 @@ int keyboard::setPosXY(int x, int y) {
 
 #ifdef _WIN32
 	trajLock.unlock();
-	gestureLock.unlock();
+	//gestureLock.unlock();
 #else
 	pthread_mutex_unlock(&trajLock);
     pthread_mutex_unlock(&gestureLock);
