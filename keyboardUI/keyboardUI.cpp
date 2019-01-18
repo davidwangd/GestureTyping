@@ -19,6 +19,18 @@ const char keyname[5][15][10] = {{"Esc", "`", "1", "2", "3", "4", "5", "6", "7",
                         {"Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "Up", "Shift"},
                         {"Fn", "Ctrl", "Win", "Alt", "Space", "Alt", "Ctrl", "Left", "Down", "Right", "??????"}};
 
+const char NormalLetterName[5][15] = {{'\0', '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\0'},
+                        {'\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\', '\0'},
+                        {'\0', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '\n', '\0', '\0'},
+                        {'\0', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', '\0', '\0', '\0', '\0'},
+                        {'\0', '\0', '\0', '\0', ' ', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}};
+
+const char ShiftedLetterName[5][15] = {{'\0', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\0'},
+                        {'\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '|', '\0'},
+                        {'\0', 'A', 'W', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '\n', '\0', '\0'},
+                        {'\0', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', '\0', '\0', '\0', '\0'},
+                        {'\0', '\0', '\0', '\0', ' ', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'}};
+
 const int len[3] = {10, 9, 7};
 const int rad[3] = {10, 20, 10};
 
@@ -33,11 +45,13 @@ keyboard::keyboard(int trajectory_len):img("keyboard.bmp"), visu(width + lrMargi
     else if (trajectory_len > 400) trajectory_point_num = 400;
     else trajectory_point_num = trajectory_len;
     head = tail = 0;
-    gesture = 0;
+    gesture = 1;
     selectingWords = false;
 
-    mode = NormalWord;
-    //mode = SingleKey;
+    shifted = CapsLocked = false;
+
+    //mode = NormalWord;
+    mode = SingleKey;
     printf("%d\n", mode);
 
     words = new char*[MAX_WORD_NUM];
@@ -131,26 +145,20 @@ int keyboard::getName(int y, int x) {
         //putchar('\n');
         char message[] = "Current key is:  ";
         message[16] = letters[y][x];
-        displayKey(message);
+        //displayKey(message);
         highlight(y, x);
     }
     else {
         //puts("Backspace");
-        displayKey("Current key is: Backspace");
+        //displayKey("Current key is: Backspace");
         antiColor(1077 + lrMargin, 0 + display_height, 1200 + lrMargin, 62 + display_height);
     }
 	return 0;
 }
 
 int keyboard::setGesture(int gesture) {
-#ifdef _WIN32
-	gestureLock.lock();
-	trajLock.lock();
-#else
-	pthread_mutex_lock(&gestureLock);
-	pthread_mutex_lock(&trajLock);
-#endif
-	//printf("Gesture: %d\n", gesture);
+    pthread_mutex_lock(&gestureLock);
+    pthread_mutex_lock(&trajLock);
     if (gesture < 0) {
         selectingWords = false;
         lastGesture = -1;
@@ -185,7 +193,7 @@ int keyboard::setGesture(int gesture) {
             int thatTime = head;
             int x0 = px[thatTime] - lrMargin, y0 = py[thatTime] - display_height;
             printf("%d %d\n", x0, y0);
-            if ((x0 < 63) && (y0 >= 1077)) delword();
+            if ((y0 < 63) && (x0 >= 1077)) delword();
         }
         else if (mode == SingleKey && lastGesture != -1) {
             int thatTime = head;
@@ -195,13 +203,9 @@ int keyboard::setGesture(int gesture) {
             pressKey(x0, y0);
         }
     }
-#ifdef _WIN32
-	trajLock.unlock();
-	gestureLock.unlock();
-#else
+
     pthread_mutex_unlock(&trajLock);
     pthread_mutex_unlock(&gestureLock);
-#endif
     return 0;
 }
 
@@ -213,13 +217,8 @@ int keyboard::clear_trajectory() {
 int keyboard::setPosXY(int x, int y) {
     //printf("xy: %d %d\n", x, y);
     //if (tail == trajectory_point_num - 1 || tail + 1 == head) head = (head + 1) % trajectory_point_num;
-#ifdef _WIN32
-	gestureLock.lock();
-	trajLock.lock();
-#else
     pthread_mutex_lock(&gestureLock);
     pthread_mutex_lock(&trajLock);
-#endif
     if (!bounded(x, y)) {
         printf("Error! Position index out of range.\n");
         return -1;
@@ -232,23 +231,22 @@ int keyboard::setPosXY(int x, int y) {
     tail = getnext(tail);
     draw(x, y);
 
-#ifdef _WIN32
-	trajLock.unlock();
-	gestureLock.unlock();
-#else
-	pthread_mutex_unlock(&trajLock);
+    pthread_mutex_unlock(&trajLock);
     pthread_mutex_unlock(&gestureLock);
-#endif
 
     return 0;
 }
 
 int keyboard::draw(int x, int y) {
     visu.fill(51).draw_image(0 + lrMargin, 0 + display_height, 0, 0, img);
-    if (gesture == 0) displayState("Current mode is: Typing");
-    else if (gesture == 1) displayState("Current mode is: Selecting");
-    else if (gesture == 2) displayState("Current mode is: Waiting");
+    if (gesture == 0) displayState("Current state is: Typing");
+    else if (gesture == 1) displayState("Current state is: Selecting");
+    else if (gesture == 2) displayState("Current state is: Waiting");
+
+    displayKey();
+
     if (mode == NormalWord) {
+        displayMode("Normal Input mode");
         if (selectingWords) {
             for (int i = 0; i < wordnum; i++) paint(buttons[i]);
             getButton(x, y);
@@ -256,6 +254,7 @@ int keyboard::draw(int x, int y) {
         else getPos(x, y);
     }
     else if (mode == SingleKey) {
+        displayMode("Single Key Input mode");
         getKey(x, y);
     }
     drawMouse(x, y, gesture);
@@ -351,16 +350,40 @@ void keyboard::highlightKey(int x, int y) {        ///all written of magic numbe
 void keyboard::hoverKey(int x, int y) {
     //printf(keyname[y][x]);
     char displayStr[30] = "Current Key is: ";
-    displayKey(strcat(displayStr, keyname[y][x]));
+    //displayKey(strcat(displayStr, keyname[y][x]));
     highlightKey(x, y);
 }
 
 void keyboard::pressKey(int x, int y) {
     printf("Keypressed: %s\n", keyname[y][x]);
-    if (x == 14) delword();
+    if ((x == 0 || x == 12) && y == 3) {
+        shifted = !shifted;
+        return;
+    }
+
+    if (x == 14) output.delLetter();
     else if (x == 11 && y == 3) output.pageUp();             ///Up
-    else if (x == 9 && y == 4) output.pageDown();            ///Down
-    else sendword(keyname[y][x]);
+    else if (x == 8 && y == 4) output.pageDown();            ///Down
+    else if (x == 0 && y == 2) CapsLocked = !CapsLocked;
+    //else sendword(keyname[y][x]);
+    else if (NormalLetterName[y][x] != '\0') {
+        char ch = NormalLetterName[y][x];
+        if ('a' <= ch && ch <= 'z') {
+            if (CapsLocked) {
+                if (shifted) output.setLetter(ch);
+                else output.setLetter(ShiftedLetterName[y][x]);
+            }
+            else {
+                if (shifted) output.setLetter(ShiftedLetterName[y][x]);
+                else output.setLetter(ch);
+            }
+        }
+        else {
+            if (shifted) output.setLetter(ShiftedLetterName[y][x]);
+            else output.setLetter(ch);
+        }
+    }
+    shifted = false;
 
 }
 
@@ -412,24 +435,27 @@ int keyboard::getnext(int i) {
     else return (i+1);
 }
 
-int keyboard::displayKey(const char *str) {
+int keyboard::displayMode(const char *str) {
     visu.draw_text(230, 335 + display_height, str, white, bgc, 1, 24);
 	return 0;
 }
-
 
 int keyboard::displayState(const char *str) {
     visu.draw_text(730, 335 + display_height, str, white, bgc, 1, 24);
 	return 0;
 }
 
+void keyboard::displayKey() {
+    if (CapsLocked) {
+        if (shifted) visu.draw_text(520, 335 + display_height, "Caps Shift", red, bgc, 1, 24);
+        else visu.draw_text(520, 335 + display_height, "Caps", red, bgc, 1, 24);
+    }
+    else if (shifted) visu.draw_text(520, 335 + display_height, "Shift", red, bgc, 1, 24);
+}
+
 int keyboard::setwords(char **wordlist, int wordnum, bool isFinal) {
-#ifdef _WIN32
-	trajLock.lock();
-#else
     pthread_mutex_lock(&trajLock);
-#endif    
-	if (wordnum > 5) wordnum = 5;
+    if (wordnum > 5) wordnum = 5;
     if (wordnum < 0) wordnum = 0;
 
     for (int i = 0; i < wordnum; i++) strcpy(words[i], wordlist[i]);
@@ -441,18 +467,12 @@ int keyboard::setwords(char **wordlist, int wordnum, bool isFinal) {
     else {
         drawMiddleResults();
     }
-#ifdef _WIN32
-	trajLock.unlock();
-#else
     pthread_mutex_unlock(&trajLock);
-#endif
-	return 0;
 }
 
 int keyboard::drawMiddleResults() {
     printf("Drawing middle results!\n");
     for (int i = 0; i < wordnum; i++) printf("%s\n", words[i]);
-	return 0;
 }
 
 int keyboard::createButtons() {
@@ -478,7 +498,6 @@ int keyboard::createButtons() {
         default: break;
         }
     }
-	return 0;
 }
 
 void Button::setWord(char *word) {
@@ -516,4 +535,15 @@ void keyboard::getButton(int x, int y) {
 void keyboard::sendword(const char *word) {
     printf("[word]: %s\n", word);
     output.setText(word);
+}
+
+void keyboard::setMode(int Mode) {
+    if (Mode & 1 == 0) {
+        mode = NormalWord;
+        selectingWords = false;
+    }
+    else {
+        mode = SingleKey;
+        CapsLocked = shifted = false;
+    }
 }

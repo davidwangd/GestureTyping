@@ -119,6 +119,7 @@ void TextDisplay::setLetter(char c) {
 	if (c == '\t') {
 		setLetter(' ');
 		setLetter(' ');
+		return;
 	}
 	if (c == '\n') {
 		if (visu.height() < 20 + curPage->lineh * (curPage->lines + 2)) {     ///cannot put one more line
@@ -145,7 +146,7 @@ void TextDisplay::setLetter(char c) {
 
 	if (visu.width() < img.width() + 20) {
 		printf("NewLine\n");
-		
+
 		// 考虑连续输入的单词内容，加入一个空格的分割。
 		int pos = -1;
 		for (int p = len;p >= 0; p--) {
@@ -206,7 +207,7 @@ void TextDisplay::delLetter() {
 	curPage->cur[len-1] = '\0';
 	if (len == 1) {
 		curPage->lines--;
-		curPage->cur = curPage->content[curPage->lines];	
+		curPage->cur = curPage->content[curPage->lines];
 	}
 	display();
 	pre_op = DEL_TEXT;

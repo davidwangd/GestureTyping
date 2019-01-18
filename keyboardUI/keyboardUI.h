@@ -6,13 +6,7 @@
 #include<vector>
 #include<string>
 #include<iostream>
-
-#ifdef _WIN32
-#include<thread>
-#include<mutex>
-#else
 #include<pthread.h>
-#endif
 
 #include "TextDisplay.h"
 
@@ -53,17 +47,15 @@ private:
 
     Button buttons[MAX_WORD_NUM];
 
-#ifdef _WIN32
-	std::mutex trajLock, gestureLock;
-#else
     pthread_mutex_t trajLock, gestureLock;
-#endif
 
     cimg_library::CImg<unsigned char> img;
     cimg_library::CImg<unsigned char> visu;
     cimg_library::CImg<unsigned char> mouse;
     cimg_library::CImg<unsigned char> mouseMask;
     cimg_library::CImgDisplay disp;
+
+    bool shifted, CapsLocked;
 
     //void initPos();
 
@@ -79,9 +71,11 @@ private:
 
     int getName(int y, int x);
 
-    int displayKey(const char* str);
+    int displayMode(const char* str);
 
     int displayState(const char* str);
+
+    void displayKey();
 
     int draw(int x, int y);
 
@@ -122,6 +116,8 @@ public:
     int setPosXY(int x, int y);
 
     int setwords(char **wordlist, int wordnum, bool isFinal);
+
+    void setMode(int Mode);
 
     ~keyboard();
 };
