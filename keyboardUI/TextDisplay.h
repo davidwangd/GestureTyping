@@ -41,5 +41,12 @@ public:
     void pageDown();
 
     FILE *f;
+	
+	enum {
+		SET_TEXT,
+		DEL_TEXT,
+		SET_LETTER,
+		DEL_LETTER
+	} pre_op;
 };
 #endif // TEXT_DISPLAY

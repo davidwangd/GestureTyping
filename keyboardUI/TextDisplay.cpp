@@ -16,7 +16,7 @@ TextDisplay::TextDisplay():visu(width, height, 1, 3, 0), background("bg.bmp"), d
 
 void TextDisplay::setText(const char *text) {
     //printf("Trying to show: %s\n", text);
-    if (lastPage != curPage) return;
+	if (lastPage != curPage) return;
 
     f = fopen("result.txt", "a");
     fprintf(f, text);
@@ -52,7 +52,8 @@ void TextDisplay::setText(const char *text) {
     }        ///cannot place in this line
 
     display();
-
+	pre_op = SET_TEXT;
+	return;
 }
 
 void TextDisplay::display() {
@@ -87,6 +88,7 @@ void TextDisplay::delText() {
     else curPage->cur[0] = '\0';
 
     display();
+	pre_op = DEL_TEXT;
 }
 
 TextDisplay::~TextDisplay() {
@@ -109,6 +111,105 @@ void TextDisplay::pageDown() {
         curPage = curPage->next;
         display();
     }
+}
+
+void TextDisplay::setLetter(char c) {
+	if (c == 0) return;
+	CImg<unsigned char> img;
+	if (c == '\t') {
+		setLetter(' ');
+		setLetter(' ');
+	}
+	if (c == '\n') {
+		if (visu.height() < 20 + curPage->lineh * (curPage->lines + 2)) {     ///cannot put one more line
+			curPage->next = new Page();
+			curPage->next->last = curPage;
+			curPage = curPage->next;
+			lastPage = curPage;
+		}
+		else {
+			curPage->lines++;
+			curPage->cur = curPage->content[curPage->lines];
+			printf("NewLine success\n");
+		}
+		return;
+	}
+
+	int len = strlen(curPage->cur);
+	// 如果之前是输入的单词，那么我们需要一个空格的间隔
+	if (pre_op == SET_TEXT) curPage->cur[len++] = ' ';
+	curPage->cur[len++] = c;
+	curPage->cur[len] = '\0';
+
+	img.draw_text(0, 0, curPage->cur, black, 0, 1, 20);
+
+	if (visu.width() < img.width() + 20) {
+		printf("NewLine\n");
+		
+		// 考虑连续输入的单词内容，加入一个空格的分割。
+		int pos = -1;
+		for (int p = len;p >= 0; p--) {
+			if (curPage->cur[p] == ' ') {
+				curPage->cur[p] = '\0';
+				pos = p;
+				break;
+			}
+		}
+
+		printf("%s\n", curPage->cur);
+
+		if (visu.height() < 20 + curPage->lineh * (curPage->lines + 2)) {     ///cannot put one more line
+			curPage->next = new Page();
+			curPage->next->last = curPage;
+			curPage = curPage->next;
+			lastPage = curPage;
+		}
+		else {
+			curPage->lines++;
+			curPage->cur = curPage->content[curPage->lines];
+			printf("NewLine success\n");
+		}
+		if (pos == -1) {
+			curPage->cur[0] = c;
+			curPage->cur[1] = '\0';
+		}
+		else {
+			for (int i = pos + 1; curPage->content[curPage->lines - 1][i]; i++) {
+				curPage->cur[i - pos - 1] = curPage->content[curPage->lines - 1][i];
+				curPage->cur[i - pos] = '\0';
+			}
+		}
+	}        ///cannot place in this line
+
+	display();
+	pre_op = SET_LETTER;
+	return;
+}
+
+void TextDisplay::delLetter() {
+	if (lastPage != curPage) return;
+	int len = strlen(curPage->cur);
+	if (len == 0) {
+		if (curPage->lines > 0) {
+			curPage->lines--;
+			curPage->cur = curPage->content[curPage->lines];
+			len = strlen(curPage->cur);
+		}
+		else {
+			if (curPage->last == NULL) return;
+			curPage = curPage->last;
+			lastPage = curPage;
+			delete curPage->next;
+			len = strlen(curPage->cur);
+		}
+	}
+	curPage->cur[len-1] = '\0';
+	if (len == 1) {
+		curPage->lines--;
+		curPage->cur = curPage->content[curPage->lines];	
+	}
+	display();
+	pre_op = DEL_TEXT;
 }
 
 Page::Page() {
