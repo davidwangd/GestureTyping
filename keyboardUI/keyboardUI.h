@@ -65,6 +65,8 @@ private:
     cimg_library::CImg<unsigned char> mouseMask;
     cimg_library::CImgDisplay disp;
 
+    bool shifted, CapsLocked;
+
     //void initPos();
 
     bool bounded(int x, int y);
@@ -79,9 +81,11 @@ private:
 
     int getName(int y, int x);
 
-    int displayKey(const char* str);
+    int displayMode(const char* str);
 
     int displayState(const char* str);
+
+    void displayKey();
 
     int draw(int x, int y);
 
@@ -122,6 +126,8 @@ public:
     int setPosXY(int x, int y);
 
     int setwords(char **wordlist, int wordnum, bool isFinal);
+
+    void setMode(int Mode);
 
     ~keyboard();
 };
